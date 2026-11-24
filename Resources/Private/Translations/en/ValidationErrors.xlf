@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Fehlermeldungen des Bestellformulars, nach Fehlercode. Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="ValidationErrors". -->
+    <file original="ValidationErrors" product-name="ISP.Lanyard" source-language="de" target-language="en" datatype="plaintext">
+        <body>
+            <trans-unit id="1761480001" xml:space="preserve">
+                <source>Dieses Feld muss leer bleiben.</source>
+                <target>This field must be left empty.</target>
+            </trans-unit>
+            <trans-unit id="1761480101" xml:space="preserve">
+                <source>Bitte wählen Sie aus, als wer Sie bestellen.</source>
+                <target>Please select who you are ordering as.</target>
+            </trans-unit>
+            <trans-unit id="1761480102" xml:space="preserve">
+                <source>Das Formular konnte nicht verarbeitet werden. Bitte senden Sie es erneut ab.</source>
+                <target>The form could not be processed. Please submit it again.</target>
+            </trans-unit>
+            <trans-unit id="1761480103" xml:space="preserve">
+                <source>Dieses Feld ist ein Pflichtfeld.</source>
+                <target>This field is required.</target>
+            </trans-unit>
+            <trans-unit id="1761480104" xml:space="preserve">
+                <source>Bitte höchstens {0} Zeichen eingeben.</source>
+                <target>Please enter no more than {0} characters.</target>
+            </trans-unit>
+            <trans-unit id="1761480105" xml:space="preserve">
+                <source>Bitte geben Sie eine gültige E-Mail-Adresse ein.</source>
+                <target>Please enter a valid email address.</target>
+            </trans-unit>
+            <trans-unit id="1761480106" xml:space="preserve">
+                <source>Bitte stimmen Sie der Datenschutzerklärung zu.</source>
+                <target>Please agree to the privacy policy.</target>
+            </trans-unit>
+            <trans-unit id="1761480107" xml:space="preserve">
+                <source>Die Auswahl enthält ungültige Tickets.</source>
+                <target>The selection contains invalid tickets.</target>
+            </trans-unit>
+            <trans-unit id="1761480108" xml:space="preserve">
+                <source>Von „{0}“ sind höchstens {1} Tickets pro Bestellung möglich.</source>
+                <target>A maximum of {1} tickets of “{0}” are possible per order.</target>
+            </trans-unit>
+            <trans-unit id="1761480109" xml:space="preserve">
+                <source>Bitte wählen Sie mindestens ein Ticket aus.</source>
+                <target>Please select at least one ticket.</target>
+            </trans-unit>
+            <trans-unit id="1761480110" xml:space="preserve">
+                <source>Pro Bestellung sind höchstens {0} Tickets möglich.</source>
+                <target>A maximum of {0} tickets are possible per order.</target>
+            </trans-unit>
+            <trans-unit id="1761480111" xml:space="preserve">
+                <source>Für {0} sind nicht mehr genügend Plätze frei (noch {1} verfügbar).</source>
+                <target>There are no longer enough seats available for {0} ({1} left).</target>
+            </trans-unit>
+            <trans-unit id="1761480112" xml:space="preserve">
+                <source>Bitte wählen Sie eine Zahlungsart.</source>
+                <target>Please choose a payment method.</target>
+            </trans-unit>
+            <trans-unit id="1761480201" xml:space="preserve">
+                <source>Für diese Veranstaltung sind derzeit keine Bestellungen möglich.</source>
+                <target>Orders are currently not possible for this event.</target>
+            </trans-unit>
+            <trans-unit id="1761480202" xml:space="preserve">
+                <source>Von Ihrem Anschluss sind in kurzer Zeit bereits mehrere Anfragen eingegangen. Bitte versuchen Sie es später erneut.</source>
+                <target>Several requests have already been received from your connection within a short time. Please try again later.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

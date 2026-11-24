@@ -1,0 +1,28 @@
+{namespace f=Neos\FluidAdaptor\ViewHelpers}
+<f:section name="subject"><f:translate id="mail.cancelled.subject" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: eventTitle, 1: bookingNumber}">Ihre Bestellung wurde storniert – {eventTitle} ({bookingNumber})</f:translate></f:section>
+
+<f:section name="body">
+<p><f:translate id="mail.salutation" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: fullName}">Hallo {fullName},</f:translate></p>
+<p><f:translate id="mail.cancelled.intro" package="ISP.Lanyard" source="Mail" locale="{language}">Ihre Bestellung wurde storniert.</f:translate></p>
+<f:if condition="{rejectionReason}">
+    <p><f:translate id="mail.cancelled.reason" package="ISP.Lanyard" source="Mail" locale="{language}">Begründung</f:translate>:</p>
+    <p><f:format.nl2br>{rejectionReason}</f:format.nl2br></p>
+</f:if>
+<f:if condition="{isRefunded}">
+    <p><f:translate id="mail.cancelled.refunded" package="ISP.Lanyard" source="Mail" locale="{language}">Den bezahlten Betrag haben wir über Ihre Zahlungsart erstattet. Je nach Anbieter kann die Gutschrift einige Tage dauern.</f:translate></p>
+</f:if>
+<p><f:translate id="mail.bookingNumber" package="ISP.Lanyard" source="Mail" locale="{language}">Buchungsnummer</f:translate>: <strong>{bookingNumber}</strong></p>
+<table>
+    <f:for each="{items}" as="item">
+        <tr>
+            <td>{item.quantity} ×</td>
+            <td>{item.title}<f:if condition="{item.days}"><br /><small>{item.days}</small></f:if></td>
+            <td>{item.subtotal}</td>
+        </tr>
+    </f:for>
+    <tr>
+        <td colspan="2"><f:translate id="mail.total" package="ISP.Lanyard" source="Mail" locale="{language}">Gesamt</f:translate></td>
+        <td>{totalAmount}</td>
+    </tr>
+</table>
+</f:section>

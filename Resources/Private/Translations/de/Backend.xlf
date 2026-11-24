@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Backend-Modul "Tickets" – nur Deutsch, der Controller rendert fest in de. Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="Backend". -->
+    <file original="Backend" product-name="ISP.Lanyard" source-language="de" datatype="plaintext">
+        <body>
+            <trans-unit id="action.approve" xml:space="preserve">
+                <source>Freigeben</source>
+            </trans-unit>
+            <trans-unit id="action.approve.hint" xml:space="preserve">
+                <source>Gibt die Bestellung frei. Der Besteller erhält die Bestätigung per E-Mail.</source>
+            </trans-unit>
+            <trans-unit id="action.cancel" xml:space="preserve">
+                <source>Stornieren</source>
+            </trans-unit>
+            <trans-unit id="action.cancel.manualRefund" xml:space="preserve">
+                <source>Bereits bezahlt: Eine Erstattung erfolgt nicht automatisch.</source>
+            </trans-unit>
+            <trans-unit id="action.cancel.reason" xml:space="preserve">
+                <source>Begründung (optional, erscheint in der E-Mail)</source>
+            </trans-unit>
+            <trans-unit id="action.cancel.refund" xml:space="preserve">
+                <source>Online bezahlt: Der Betrag wird über den Zahlungsanbieter erstattet.</source>
+            </trans-unit>
+            <trans-unit id="action.markPaid" xml:space="preserve">
+                <source>Als bezahlt markieren</source>
+            </trans-unit>
+            <trans-unit id="action.reject" xml:space="preserve">
+                <source>Ablehnen</source>
+            </trans-unit>
+            <trans-unit id="action.reject.reason" xml:space="preserve">
+                <source>Begründung (optional, erscheint in der E-Mail)</source>
+            </trans-unit>
+            <trans-unit id="action.syncPayment" xml:space="preserve">
+                <source>Zahlungsstand abfragen</source>
+            </trans-unit>
+            <trans-unit id="action.syncPayment.hint" xml:space="preserve">
+                <source>Die Online-Zahlung ist noch offen. Fragt den Stand beim Zahlungsanbieter ab, falls dessen Meldung ausgeblieben ist.</source>
+            </trans-unit>
+            <trans-unit id="capacity.closed" xml:space="preserve">
+                <source>gesperrt</source>
+            </trans-unit>
+            <trans-unit id="capacity.critical" xml:space="preserve">
+                <source>wird knapp</source>
+            </trans-unit>
+            <trans-unit id="capacity.description" xml:space="preserve">
+                <source>Belegte und freie Plätze je Veranstaltungstag</source>
+            </trans-unit>
+            <trans-unit id="capacity.empty" xml:space="preserve">
+                <source>Keine Veranstaltungstage vorhanden.</source>
+            </trans-unit>
+            <trans-unit id="capacity.overbooked" xml:space="preserve">
+                <source>überbucht</source>
+            </trans-unit>
+            <trans-unit id="capacity.title" xml:space="preserve">
+                <source>Auslastung</source>
+            </trans-unit>
+            <trans-unit id="detail.back" xml:space="preserve">
+                <source>Zur Liste</source>
+            </trans-unit>
+            <trans-unit id="detail.edit" xml:space="preserve">
+                <source>Daten bearbeiten</source>
+            </trans-unit>
+            <trans-unit id="detail.history" xml:space="preserve">
+                <source>Verlauf</source>
+            </trans-unit>
+            <trans-unit id="detail.items" xml:space="preserve">
+                <source>Tickets</source>
+            </trans-unit>
+            <trans-unit id="detail.noActions" xml:space="preserve">
+                <source>Für diese Bestellung sind keine Statuswechsel mehr möglich.</source>
+            </trans-unit>
+            <trans-unit id="detail.orderer" xml:space="preserve">
+                <source>Besteller</source>
+            </trans-unit>
+            <trans-unit id="detail.progress" xml:space="preserve">
+                <source>Ablauf</source>
+            </trans-unit>
+            <trans-unit id="detail.received" xml:space="preserve">
+                <source>eingegangen am {0}</source>
+            </trans-unit>
+            <trans-unit id="detail.title" xml:space="preserve">
+                <source>Bestellung {0}</source>
+            </trans-unit>
+            <trans-unit id="detail.titlePrefix" xml:space="preserve">
+                <source>Bestellung</source>
+            </trans-unit>
+            <trans-unit id="edit.hint" xml:space="preserve">
+                <source>Die Tickets lassen sich hier nicht ändern. Für eine andere Menge die Bestellung stornieren und manuell neu buchen.</source>
+            </trans-unit>
+            <trans-unit id="edit.title" xml:space="preserve">
+                <source>Bestelldaten bearbeiten</source>
+            </trans-unit>
+            <trans-unit id="field.available" xml:space="preserve">
+                <source>Frei</source>
+            </trans-unit>
+            <trans-unit id="field.bookingNumber" xml:space="preserve">
+                <source>Buchungsnummer</source>
+            </trans-unit>
+            <trans-unit id="field.capacity" xml:space="preserve">
+                <source>Kapazität</source>
+            </trans-unit>
+            <trans-unit id="field.createdAt" xml:space="preserve">
+                <source>Eingang</source>
+            </trans-unit>
+            <trans-unit id="field.date" xml:space="preserve">
+                <source>Datum</source>
+            </trans-unit>
+            <trans-unit id="field.day" xml:space="preserve">
+                <source>Tag</source>
+            </trans-unit>
+            <trans-unit id="field.days" xml:space="preserve">
+                <source>Tage</source>
+            </trans-unit>
+            <trans-unit id="field.email" xml:space="preserve">
+                <source>E-Mail</source>
+            </trans-unit>
+            <trans-unit id="field.event" xml:space="preserve">
+                <source>Veranstaltung</source>
+            </trans-unit>
+            <trans-unit id="field.grandTotal" xml:space="preserve">
+                <source>Gesamt</source>
+            </trans-unit>
+            <trans-unit id="field.internalNote" xml:space="preserve">
+                <source>Interne Notiz</source>
+            </trans-unit>
+            <trans-unit id="field.language" xml:space="preserve">
+                <source>Sprache</source>
+            </trans-unit>
+            <trans-unit id="field.mailLanguage" xml:space="preserve">
+                <source>Sprache der E-Mails</source>
+            </trans-unit>
+            <trans-unit id="field.message" xml:space="preserve">
+                <source>Nachricht</source>
+            </trans-unit>
+            <trans-unit id="field.name" xml:space="preserve">
+                <source>Name</source>
+            </trans-unit>
+            <trans-unit id="field.note" xml:space="preserve">
+                <source>Hinweis</source>
+            </trans-unit>
+            <trans-unit id="field.optInConfirmedAt" xml:space="preserve">
+                <source>E-Mail bestätigt</source>
+            </trans-unit>
+            <trans-unit id="field.orderer" xml:space="preserve">
+                <source>Besteller</source>
+            </trans-unit>
+            <trans-unit id="field.ordererType" xml:space="preserve">
+                <source>Art</source>
+            </trans-unit>
+            <trans-unit id="field.organisation" xml:space="preserve">
+                <source>Organisation</source>
+            </trans-unit>
+            <trans-unit id="field.paymentAmount" xml:space="preserve">
+                <source>Betrag</source>
+            </trans-unit>
+            <trans-unit id="field.paymentDate" xml:space="preserve">
+                <source>Bezahlt am</source>
+            </trans-unit>
+            <trans-unit id="field.paymentMethod" xml:space="preserve">
+                <source>Zahlungsart</source>
+            </trans-unit>
+            <trans-unit id="field.paymentReference" xml:space="preserve">
+                <source>Zahlungsreferenz</source>
+            </trans-unit>
+            <trans-unit id="field.paymentStatus" xml:space="preserve">
+                <source>Zahlungsstand</source>
+            </trans-unit>
+            <trans-unit id="field.phone" xml:space="preserve">
+                <source>Telefon</source>
+            </trans-unit>
+            <trans-unit id="field.quantity" xml:space="preserve">
+                <source>Anzahl</source>
+            </trans-unit>
+            <trans-unit id="field.reason" xml:space="preserve">
+                <source>Begründung</source>
+            </trans-unit>
+            <trans-unit id="field.reserved" xml:space="preserve">
+                <source>Belegt</source>
+            </trans-unit>
+            <trans-unit id="field.status" xml:space="preserve">
+                <source>Status</source>
+            </trans-unit>
+            <trans-unit id="field.subtotal" xml:space="preserve">
+                <source>Summe</source>
+            </trans-unit>
+            <trans-unit id="field.ticket" xml:space="preserve">
+                <source>Ticket</source>
+            </trans-unit>
+            <trans-unit id="field.ticketCount" xml:space="preserve">
+                <source>Tickets</source>
+            </trans-unit>
+            <trans-unit id="field.total" xml:space="preserve">
+                <source>Betrag</source>
+            </trans-unit>
+            <trans-unit id="field.unitPrice" xml:space="preserve">
+                <source>Einzelpreis</source>
+            </trans-unit>
+            <trans-unit id="field.updatedAt" xml:space="preserve">
+                <source>Letzte Änderung</source>
+            </trans-unit>
+            <trans-unit id="field.utilisation" xml:space="preserve">
+                <source>Auslastung</source>
+            </trans-unit>
+            <trans-unit id="filter.allEvents" xml:space="preserve">
+                <source>Alle Veranstaltungen</source>
+            </trans-unit>
+            <trans-unit id="filter.reset" xml:space="preserve">
+                <source>Zurücksetzen</source>
+            </trans-unit>
+            <trans-unit id="filter.search" xml:space="preserve">
+                <source>Suche</source>
+            </trans-unit>
+            <trans-unit id="filter.submit" xml:space="preserve">
+                <source>Filtern</source>
+            </trans-unit>
+            <trans-unit id="history.action.approved" xml:space="preserve">
+                <source>Freigegeben</source>
+            </trans-unit>
+            <trans-unit id="history.action.cancelled" xml:space="preserve">
+                <source>Storniert</source>
+            </trans-unit>
+            <trans-unit id="history.action.createdManually" xml:space="preserve">
+                <source>Manuell angelegt</source>
+            </trans-unit>
+            <trans-unit id="history.action.expired" xml:space="preserve">
+                <source>Verfallen (nicht bestätigt)</source>
+            </trans-unit>
+            <trans-unit id="history.action.optInConfirmed" xml:space="preserve">
+                <source>E-Mail-Adresse bestätigt</source>
+            </trans-unit>
+            <trans-unit id="history.action.paid" xml:space="preserve">
+                <source>Bezahlt</source>
+            </trans-unit>
+            <trans-unit id="history.action.paymentFailed" xml:space="preserve">
+                <source>Zahlung nicht abgeschlossen</source>
+            </trans-unit>
+            <trans-unit id="history.action.paymentStarted" xml:space="preserve">
+                <source>Zahlung gestartet</source>
+            </trans-unit>
+            <trans-unit id="history.action.placed" xml:space="preserve">
+                <source>Bestellung eingegangen</source>
+            </trans-unit>
+            <trans-unit id="history.action.refunded" xml:space="preserve">
+                <source>Erstattet</source>
+            </trans-unit>
+            <trans-unit id="history.action.rejected" xml:space="preserve">
+                <source>Abgelehnt</source>
+            </trans-unit>
+            <trans-unit id="history.action.updated" xml:space="preserve">
+                <source>Daten geändert</source>
+            </trans-unit>
+            <trans-unit id="history.actor.customer" xml:space="preserve">
+                <source>Besteller</source>
+            </trans-unit>
+            <trans-unit id="history.actor.gateway" xml:space="preserve">
+                <source>Zahlungsanbieter</source>
+            </trans-unit>
+            <trans-unit id="history.actor.system" xml:space="preserve">
+                <source>System</source>
+            </trans-unit>
+            <trans-unit id="history.details" xml:space="preserve">
+                <source>Details</source>
+            </trans-unit>
+            <trans-unit id="history.what" xml:space="preserve">
+                <source>Vorgang</source>
+            </trans-unit>
+            <trans-unit id="history.when" xml:space="preserve">
+                <source>Zeitpunkt</source>
+            </trans-unit>
+            <trans-unit id="history.who" xml:space="preserve">
+                <source>Durch</source>
+            </trans-unit>
+            <trans-unit id="list.description" xml:space="preserve">
+                <source>Ticketbestellungen prüfen, freigeben und exportieren</source>
+            </trans-unit>
+            <trans-unit id="list.empty" xml:space="preserve">
+                <source>Keine Bestellungen für diese Auswahl.</source>
+            </trans-unit>
+            <trans-unit id="list.export" xml:space="preserve">
+                <source>CSV-Export</source>
+            </trans-unit>
+            <trans-unit id="list.found" xml:space="preserve">
+                <source>{0} Bestellungen gefunden</source>
+            </trans-unit>
+            <trans-unit id="list.new" xml:space="preserve">
+                <source>Manuelle Buchung</source>
+            </trans-unit>
+            <trans-unit id="list.next" xml:space="preserve">
+                <source>Weiter</source>
+            </trans-unit>
+            <trans-unit id="list.page" xml:space="preserve">
+                <source>Seite {0} von {1}</source>
+            </trans-unit>
+            <trans-unit id="list.previous" xml:space="preserve">
+                <source>Zurück</source>
+            </trans-unit>
+            <trans-unit id="list.show" xml:space="preserve">
+                <source>Details ansehen</source>
+            </trans-unit>
+            <trans-unit id="list.sums" xml:space="preserve">
+                <source>{0} Tickets · {1}</source>
+            </trans-unit>
+            <trans-unit id="list.time" xml:space="preserve">
+                <source>{0} Uhr</source>
+            </trans-unit>
+            <trans-unit id="list.title" xml:space="preserve">
+                <source>Bestellungen</source>
+            </trans-unit>
+            <trans-unit id="nav.capacity" xml:space="preserve">
+                <source>Auslastung</source>
+            </trans-unit>
+            <trans-unit id="nav.list" xml:space="preserve">
+                <source>Bestellungen</source>
+            </trans-unit>
+            <trans-unit id="nav.pickup" xml:space="preserve">
+                <source>Abholliste</source>
+            </trans-unit>
+            <trans-unit id="nav.setup" xml:space="preserve">
+                <source>Stammdaten</source>
+            </trans-unit>
+            <trans-unit id="new.choose" xml:space="preserve">
+                <source>Auswählen</source>
+            </trans-unit>
+            <trans-unit id="new.chooseEvent" xml:space="preserve">
+                <source>Veranstaltung wählen</source>
+            </trans-unit>
+            <trans-unit id="new.hint" xml:space="preserve">
+                <source>Ohne Bestätigungs-E-Mail, die Plätze werden sofort gebucht. Auch inaktive Ticketarten sind buchbar, z. B. Freikarten.</source>
+            </trans-unit>
+            <trans-unit id="new.inactiveHint" xml:space="preserve">
+                <source>inaktiv – nicht im Formular</source>
+            </trans-unit>
+            <trans-unit id="new.save" xml:space="preserve">
+                <source>Buchen</source>
+            </trans-unit>
+            <trans-unit id="new.title" xml:space="preserve">
+                <source>Manuelle Buchung</source>
+            </trans-unit>
+            <trans-unit id="ordererType.group" xml:space="preserve">
+                <source>Organisation oder Gruppe</source>
+            </trans-unit>
+            <trans-unit id="ordererType.private" xml:space="preserve">
+                <source>Privatperson</source>
+            </trans-unit>
+            <trans-unit id="paymentStatus.cancelled" xml:space="preserve">
+                <source>abgebrochen</source>
+            </trans-unit>
+            <trans-unit id="paymentStatus.expired" xml:space="preserve">
+                <source>verfallen</source>
+            </trans-unit>
+            <trans-unit id="paymentStatus.failed" xml:space="preserve">
+                <source>fehlgeschlagen</source>
+            </trans-unit>
+            <trans-unit id="paymentStatus.open" xml:space="preserve">
+                <source>offen</source>
+            </trans-unit>
+            <trans-unit id="paymentStatus.paid" xml:space="preserve">
+                <source>bezahlt</source>
+            </trans-unit>
+            <trans-unit id="paymentStatus.refunded" xml:space="preserve">
+                <source>erstattet</source>
+            </trans-unit>
+            <trans-unit id="pickup.chooseDay" xml:space="preserve">
+                <source>Tag wählen</source>
+            </trans-unit>
+            <trans-unit id="pickup.empty" xml:space="preserve">
+                <source>Für diesen Tag gibt es keine freigegebenen Bestellungen.</source>
+            </trans-unit>
+            <trans-unit id="pickup.hint" xml:space="preserve">
+                <source>Freigegebene und bezahlte Bestellungen mit Tickets für diesen Tag. Noch nicht freigegebene Anfragen fehlen.</source>
+            </trans-unit>
+            <trans-unit id="pickup.isOpen" xml:space="preserve">
+                <source>offen: {0}</source>
+            </trans-unit>
+            <trans-unit id="pickup.isPaid" xml:space="preserve">
+                <source>bezahlt</source>
+            </trans-unit>
+            <trans-unit id="pickup.paid" xml:space="preserve">
+                <source>Bezahlt</source>
+            </trans-unit>
+            <trans-unit id="pickup.quantity" xml:space="preserve">
+                <source>Tickets</source>
+            </trans-unit>
+            <trans-unit id="pickup.show" xml:space="preserve">
+                <source>Anzeigen</source>
+            </trans-unit>
+            <trans-unit id="pickup.sums" xml:space="preserve">
+                <source>{0} Bestellungen · {1} Tickets · offen {2}</source>
+            </trans-unit>
+            <trans-unit id="pickup.title" xml:space="preserve">
+                <source>Abholliste</source>
+            </trans-unit>
+            <trans-unit id="setup.active" xml:space="preserve">
+                <source>aktiv</source>
+            </trans-unit>
+            <trans-unit id="setup.back" xml:space="preserve">
+                <source>Zur Übersicht</source>
+            </trans-unit>
+            <trans-unit id="setup.cancel" xml:space="preserve">
+                <source>Abbrechen</source>
+            </trans-unit>
+            <trans-unit id="setup.column.active" xml:space="preserve">
+                <source>Aktiv</source>
+            </trans-unit>
+            <trans-unit id="setup.column.capacity" xml:space="preserve">
+                <source>Kapazität</source>
+            </trans-unit>
+            <trans-unit id="setup.column.coveredDays" xml:space="preserve">
+                <source>Tage</source>
+            </trans-unit>
+            <trans-unit id="setup.column.date" xml:space="preserve">
+                <source>Datum</source>
+            </trans-unit>
+            <trans-unit id="setup.column.identifier" xml:space="preserve">
+                <source>Kurzschlüssel</source>
+            </trans-unit>
+            <trans-unit id="setup.column.maxPerOrder" xml:space="preserve">
+                <source>Max. pro Bestellung</source>
+            </trans-unit>
+            <trans-unit id="setup.column.price" xml:space="preserve">
+                <source>Preis</source>
+            </trans-unit>
+            <trans-unit id="setup.column.title" xml:space="preserve">
+                <source>Titel</source>
+            </trans-unit>
+            <trans-unit id="setup.day.editTitle" xml:space="preserve">
+                <source>Tag bearbeiten</source>
+            </trans-unit>
+            <trans-unit id="setup.day.empty" xml:space="preserve">
+                <source>Noch keine Tage angelegt.</source>
+            </trans-unit>
+            <trans-unit id="setup.day.new" xml:space="preserve">
+                <source>Tag hinzufügen</source>
+            </trans-unit>
+            <trans-unit id="setup.day.newTitle" xml:space="preserve">
+                <source>Neuer Tag</source>
+            </trans-unit>
+            <trans-unit id="setup.day.open" xml:space="preserve">
+                <source>buchbar</source>
+            </trans-unit>
+            <trans-unit id="setup.day.reserved" xml:space="preserve">
+                <source>Belegt</source>
+            </trans-unit>
+            <trans-unit id="setup.day.reservedHint" xml:space="preserve">
+                <source>Belegt: {0} Plätze. Die Kapazität darf darunter liegen – der Tag gilt dann als überbucht.</source>
+            </trans-unit>
+            <trans-unit id="setup.dayTickets.hint" xml:space="preserve">
+                <source>Für jeden gewählten Tag entsteht eine eigene Ticketart mit diesen Angaben. Für weitere Preisstufen (z. B. ermäßigt) das Formular erneut ausfüllen.</source>
+            </trans-unit>
+            <trans-unit id="setup.dayTickets.new" xml:space="preserve">
+                <source>Tagestickets anlegen</source>
+            </trans-unit>
+            <trans-unit id="setup.dayTickets.save" xml:space="preserve">
+                <source>Tagestickets anlegen</source>
+            </trans-unit>
+            <trans-unit id="setup.dayTickets.title" xml:space="preserve">
+                <source>Tagestickets anlegen</source>
+            </trans-unit>
+            <trans-unit id="setup.delete" xml:space="preserve">
+                <source>Löschen</source>
+            </trans-unit>
+            <trans-unit id="setup.description" xml:space="preserve">
+                <source>Veranstaltungen mit ihren Tagen und Ticketarten</source>
+            </trans-unit>
+            <trans-unit id="setup.edit" xml:space="preserve">
+                <source>Bearbeiten</source>
+            </trans-unit>
+            <trans-unit id="setup.event.days" xml:space="preserve">
+                <source>Tage</source>
+            </trans-unit>
+            <trans-unit id="setup.event.delete" xml:space="preserve">
+                <source>Veranstaltung löschen</source>
+            </trans-unit>
+            <trans-unit id="setup.event.description" xml:space="preserve">
+                <source>Grunddaten der Veranstaltung</source>
+            </trans-unit>
+            <trans-unit id="setup.event.empty" xml:space="preserve">
+                <source>Noch keine Veranstaltung angelegt.</source>
+            </trans-unit>
+            <trans-unit id="setup.event.new" xml:space="preserve">
+                <source>Neue Veranstaltung</source>
+            </trans-unit>
+            <trans-unit id="setup.event.newTitle" xml:space="preserve">
+                <source>Neue Veranstaltung</source>
+            </trans-unit>
+            <trans-unit id="setup.event.noKey" xml:space="preserve">
+                <source>ohne – nicht im Formular wählbar</source>
+            </trans-unit>
+            <trans-unit id="setup.event.ticketTypes" xml:space="preserve">
+                <source>Ticketarten</source>
+            </trans-unit>
+            <trans-unit id="setup.field.active" xml:space="preserve">
+                <source>Aktiv – im Bestellformular buchbar</source>
+            </trans-unit>
+            <trans-unit id="setup.field.approved" xml:space="preserve">
+                <source>Sofort freigeben</source>
+            </trans-unit>
+            <trans-unit id="setup.field.capacity" xml:space="preserve">
+                <source>Kapazität</source>
+            </trans-unit>
+            <trans-unit id="setup.field.closed" xml:space="preserve">
+                <source>Gesperrt – keine neuen Bestellungen für diesen Tag</source>
+            </trans-unit>
+            <trans-unit id="setup.field.coveredDays" xml:space="preserve">
+                <source>Gilt an folgenden Tagen</source>
+            </trans-unit>
+            <trans-unit id="setup.field.date" xml:space="preserve">
+                <source>Datum</source>
+            </trans-unit>
+            <trans-unit id="setup.field.dayTicketDays" xml:space="preserve">
+                <source>Für folgende Tage anlegen</source>
+            </trans-unit>
+            <trans-unit id="setup.field.dayTitle" xml:space="preserve">
+                <source>Eigener Titel</source>
+            </trans-unit>
+            <trans-unit id="setup.field.dayTitleEn" xml:space="preserve">
+                <source>Eigener Titel (englisch)</source>
+            </trans-unit>
+            <trans-unit id="setup.field.description" xml:space="preserve">
+                <source>Beschreibung</source>
+            </trans-unit>
+            <trans-unit id="setup.field.descriptionEn" xml:space="preserve">
+                <source>Beschreibung (englisch)</source>
+            </trans-unit>
+            <trans-unit id="setup.field.email" xml:space="preserve">
+                <source>E-Mail</source>
+            </trans-unit>
+            <trans-unit id="setup.field.firstName" xml:space="preserve">
+                <source>Vorname</source>
+            </trans-unit>
+            <trans-unit id="setup.field.identifier" xml:space="preserve">
+                <source>Kurzschlüssel</source>
+            </trans-unit>
+            <trans-unit id="setup.field.internalNote" xml:space="preserve">
+                <source>Interne Notiz</source>
+            </trans-unit>
+            <trans-unit id="setup.field.lastName" xml:space="preserve">
+                <source>Nachname</source>
+            </trans-unit>
+            <trans-unit id="setup.field.maxPerOrder" xml:space="preserve">
+                <source>Höchstens pro Bestellung</source>
+            </trans-unit>
+            <trans-unit id="setup.field.message" xml:space="preserve">
+                <source>Nachricht des Bestellers</source>
+            </trans-unit>
+            <trans-unit id="setup.field.organisation" xml:space="preserve">
+                <source>Organisation</source>
+            </trans-unit>
+            <trans-unit id="setup.field.phone" xml:space="preserve">
+                <source>Telefon</source>
+            </trans-unit>
+            <trans-unit id="setup.field.price" xml:space="preserve">
+                <source>Preis in Euro</source>
+            </trans-unit>
+            <trans-unit id="setup.field.sortingIndex" xml:space="preserve">
+                <source>Reihenfolge</source>
+            </trans-unit>
+            <trans-unit id="setup.field.title" xml:space="preserve">
+                <source>Titel</source>
+            </trans-unit>
+            <trans-unit id="setup.field.titleEn" xml:space="preserve">
+                <source>Titel (englisch)</source>
+            </trans-unit>
+            <trans-unit id="setup.help.coverageLocked" xml:space="preserve">
+                <source>Für diese Ticketart sind bereits Plätze gebucht – die Tage lassen sich nicht mehr ändern.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.dayTicketTitle" xml:space="preserve">
+                <source>Z. B. „Tagesticket Erwachsene“. Der Tag steht im Formular als Überschrift darüber.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.dayTitle" xml:space="preserve">
+                <source>Z. B. „Eröffnungsfeier“. Ohne Titel wird das Datum angezeigt.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.identifier" xml:space="preserve">
+                <source>Über diesen Schlüssel wählt das Bestellformular die Veranstaltung, z. B. jugend-wm. Ohne Schlüssel erscheint sie dort nicht.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.internalNote" xml:space="preserve">
+                <source>Nur im Backend sichtbar.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.maxPerOrder" xml:space="preserve">
+                <source>0 = nur die allgemeine Grenze gilt.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.noDays" xml:space="preserve">
+                <source>Legen Sie zuerst Tage für die Veranstaltung an.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.organisation" xml:space="preserve">
+                <source>Bei Organisationen und Gruppen Pflicht.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.price" xml:space="preserve">
+                <source>Z. B. 18,50</source>
+            </trans-unit>
+            <trans-unit id="setup.help.sortingIndex" xml:space="preserve">
+                <source>Reihenfolge innerhalb eines Tages, z. B. Erwachsene vor Ermäßigt.</source>
+            </trans-unit>
+            <trans-unit id="setup.help.titleEn" xml:space="preserve">
+                <source>Leer lassen, um den deutschen Titel zu verwenden.</source>
+            </trans-unit>
+            <trans-unit id="setup.inactive" xml:space="preserve">
+                <source>inaktiv</source>
+            </trans-unit>
+            <trans-unit id="setup.save" xml:space="preserve">
+                <source>Speichern</source>
+            </trans-unit>
+            <trans-unit id="setup.ticketType.editTitle" xml:space="preserve">
+                <source>Ticketart bearbeiten</source>
+            </trans-unit>
+            <trans-unit id="setup.ticketType.empty" xml:space="preserve">
+                <source>Noch keine Ticketarten angelegt.</source>
+            </trans-unit>
+            <trans-unit id="setup.ticketType.hint" xml:space="preserve">
+                <source>Tagestickets gelten an genau einem Tag und erscheinen im Formular unter diesem Tag. Ticketarten über mehrere Tage erscheinen dort als Mehrtagestickets.</source>
+            </trans-unit>
+            <trans-unit id="setup.ticketType.new" xml:space="preserve">
+                <source>Einzelne Ticketart hinzufügen</source>
+            </trans-unit>
+            <trans-unit id="setup.ticketType.newTitle" xml:space="preserve">
+                <source>Neue Ticketart</source>
+            </trans-unit>
+            <trans-unit id="setup.title" xml:space="preserve">
+                <source>Stammdaten</source>
+            </trans-unit>
+            <trans-unit id="status.all" xml:space="preserve">
+                <source>Alle Status</source>
+            </trans-unit>
+            <trans-unit id="status.cancelled" xml:space="preserve">
+                <source>Storniert</source>
+            </trans-unit>
+            <trans-unit id="status.confirmed" xml:space="preserve">
+                <source>Freigegeben</source>
+            </trans-unit>
+            <trans-unit id="status.expired" xml:space="preserve">
+                <source>Verfallen</source>
+            </trans-unit>
+            <trans-unit id="status.paid" xml:space="preserve">
+                <source>Bezahlt</source>
+            </trans-unit>
+            <trans-unit id="status.pendingPayment" xml:space="preserve">
+                <source>Zahlung offen</source>
+            </trans-unit>
+            <trans-unit id="status.received" xml:space="preserve">
+                <source>E-Mail unbestätigt</source>
+            </trans-unit>
+            <trans-unit id="status.rejected" xml:space="preserve">
+                <source>Abgelehnt</source>
+            </trans-unit>
+            <trans-unit id="status.requested" xml:space="preserve">
+                <source>Wartet auf Freigabe</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

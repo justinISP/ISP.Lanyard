@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Mails – Fallbacks stehen auch in den Templates. Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="Mail". -->
+    <file original="Mail" product-name="ISP.Lanyard" source-language="de" datatype="plaintext">
+        <body>
+            <trans-unit id="mail.bookingNumber" xml:space="preserve">
+                <source>Buchungsnummer</source>
+            </trans-unit>
+            <trans-unit id="mail.cancelled.intro" xml:space="preserve">
+                <source>Ihre Bestellung wurde storniert.</source>
+            </trans-unit>
+            <trans-unit id="mail.cancelled.reason" xml:space="preserve">
+                <source>Begründung</source>
+            </trans-unit>
+            <trans-unit id="mail.cancelled.refunded" xml:space="preserve">
+                <source>Den bezahlten Betrag haben wir über Ihre Zahlungsart erstattet. Je nach Anbieter kann die Gutschrift einige Tage dauern.</source>
+            </trans-unit>
+            <trans-unit id="mail.cancelled.subject" xml:space="preserve">
+                <source>Ihre Bestellung wurde storniert – {0} ({1})</source>
+            </trans-unit>
+            <trans-unit id="mail.confirmed.intro" xml:space="preserve">
+                <source>Ihre Ticketanfrage wurde freigegeben.</source>
+            </trans-unit>
+            <trans-unit id="mail.confirmed.subject" xml:space="preserve">
+                <source>Ihre Tickets sind bestätigt – {0} ({1})</source>
+            </trans-unit>
+            <trans-unit id="mail.field.email" xml:space="preserve">
+                <source>E-Mail</source>
+            </trans-unit>
+            <trans-unit id="mail.field.message" xml:space="preserve">
+                <source>Nachricht</source>
+            </trans-unit>
+            <trans-unit id="mail.field.name" xml:space="preserve">
+                <source>Name</source>
+            </trans-unit>
+            <trans-unit id="mail.field.organisation" xml:space="preserve">
+                <source>Organisation</source>
+            </trans-unit>
+            <trans-unit id="mail.field.phone" xml:space="preserve">
+                <source>Telefon</source>
+            </trans-unit>
+            <trans-unit id="mail.notification.intro" xml:space="preserve">
+                <source>Eine neue Ticketanfrage wartet auf Freigabe.</source>
+            </trans-unit>
+            <trans-unit id="mail.notification.paid.intro" xml:space="preserve">
+                <source>Eine neue Bestellung ist online bezahlt eingegangen. Eine Freigabe ist nicht nötig.</source>
+            </trans-unit>
+            <trans-unit id="mail.notification.paid.subject" xml:space="preserve">
+                <source>Neue bezahlte Bestellung – {0} ({1})</source>
+            </trans-unit>
+            <trans-unit id="mail.notification.subject" xml:space="preserve">
+                <source>Neue Ticketanfrage zur Freigabe – {0} ({1})</source>
+            </trans-unit>
+            <trans-unit id="mail.optIn.ignore" xml:space="preserve">
+                <source>Wenn Sie keine Tickets angefragt haben, können Sie diese E-Mail ignorieren.</source>
+            </trans-unit>
+            <trans-unit id="mail.optIn.intro" xml:space="preserve">
+                <source>vielen Dank für Ihre Ticketanfrage. Bitte bestätigen Sie Ihre E-Mail-Adresse über den folgenden Link. Erst danach wird Ihre Anfrage bearbeitet.</source>
+            </trans-unit>
+            <trans-unit id="mail.optIn.subject" xml:space="preserve">
+                <source>Bitte bestätigen Sie Ihre Ticketanfrage – {0}</source>
+            </trans-unit>
+            <trans-unit id="mail.paid.intro" xml:space="preserve">
+                <source>vielen Dank für Ihre Bestellung. Ihre Zahlung ist eingegangen, Ihre Tickets sind gebucht.</source>
+            </trans-unit>
+            <trans-unit id="mail.paid.subject" xml:space="preserve">
+                <source>Zahlung eingegangen, Ihre Tickets sind gebucht – {0} ({1})</source>
+            </trans-unit>
+            <trans-unit id="mail.paymentMethod" xml:space="preserve">
+                <source>Zahlungsart</source>
+            </trans-unit>
+            <trans-unit id="mail.rejected.intro" xml:space="preserve">
+                <source>leider können wir Ihre Ticketanfrage nicht annehmen.</source>
+            </trans-unit>
+            <trans-unit id="mail.rejected.reason" xml:space="preserve">
+                <source>Begründung</source>
+            </trans-unit>
+            <trans-unit id="mail.rejected.subject" xml:space="preserve">
+                <source>Ihre Ticketanfrage – {0}</source>
+            </trans-unit>
+            <trans-unit id="mail.salutation" xml:space="preserve">
+                <source>Hallo {0},</source>
+            </trans-unit>
+            <trans-unit id="mail.total" xml:space="preserve">
+                <source>Gesamt</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

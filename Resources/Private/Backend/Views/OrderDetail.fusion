@@ -1,0 +1,314 @@
+##
+# Detailansicht. Kontext aus OrderController::showAction(): order,
+# paymentMethodOptions (Zahlungsarten zum Markieren als bezahlt).
+#
+# Inhalt links, Statuswechsel rechts – auf schmalen Bildschirmen
+# untereinander.
+#
+prototype(ISP.Lanyard:Backend.Integration.OrderDetail) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'list'
+
+    content = ISP.Lanyard:Backend.Presentation.OrderDetail {
+        order = ${order}
+        canManage = ${lanyardCan.manageOrders}
+        backUri = Neos.Fusion:UriBuilder {
+            action = 'index'
+        }
+        approveUri = Neos.Fusion:UriBuilder {
+            action = 'approve'
+            arguments.order = ${order.identifier}
+        }
+        rejectUri = Neos.Fusion:UriBuilder {
+            action = 'reject'
+            arguments.order = ${order.identifier}
+        }
+        cancelUri = Neos.Fusion:UriBuilder {
+            action = 'cancel'
+            arguments.order = ${order.identifier}
+        }
+        markPaidUri = Neos.Fusion:UriBuilder {
+            action = 'markPaid'
+            arguments.order = ${order.identifier}
+        }
+        syncPaymentUri = Neos.Fusion:UriBuilder {
+            action = 'syncPayment'
+            arguments.order = ${order.identifier}
+        }
+        paymentMethodOptions = ${paymentMethodOptions}
+        editUri = Neos.Fusion:UriBuilder {
+            action = 'edit'
+            arguments.order = ${order.identifier}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.OrderDetail) < prototype(Neos.Fusion:Component) {
+
+    order = ${{}}
+    # Ohne ISP.Lanyard:ManageOrders keine Statuswechsel
+    canManage = false
+    backUri = ''
+    approveUri = ''
+    rejectUri = ''
+    cancelUri = ''
+    markPaidUri = ''
+    syncPaymentUri = ''
+    editUri = ''
+    # [{value, label}] – leer: Freitextfeld
+    paymentMethodOptions = ${[]}
+
+    hasActions = ${this.order.can.approve || this.order.can.reject || this.order.can.markPaid || this.order.can.syncPayment || this.order.can.cancel}
+
+    renderer = afx`
+        <a href={props.backUri} class="lanyardBackendBack">
+            <ISP.Lanyard:Backend.Icon name="arrowLeft" />
+            <ISP.Lanyard:Backend.T id="detail.back" fallback="Zur Liste" />
+        </a>
+
+        <header class="lanyardBackendHead">
+            <div>
+                <h2>
+                    <span>
+                        <ISP.Lanyard:Backend.T id="detail.titlePrefix" fallback="Bestellung" />
+                        {' '}<span class="lanyardBackendCode">{props.order.bookingNumber}</span>
+                    </span>
+                    <ISP.Lanyard:Backend.StatusLabel status={props.order.status} />
+                </h2>
+                <p>
+                    {String.htmlSpecialChars(props.order.eventTitle)}
+                    {' · '}
+                    <ISP.Lanyard:Backend.T id="detail.received" fallback="eingegangen am {0}" arguments={[props.order.createdAt]} />
+                </p>
+            </div>
+            <div class="lanyardBackendHeadActions">
+                <ISP.Lanyard:Backend.Button @if.canManage={props.canManage} href={props.editUri} icon="edit">
+                    <ISP.Lanyard:Backend.T id="detail.edit" fallback="Daten bearbeiten" />
+                </ISP.Lanyard:Backend.Button>
+            </div>
+        </header>
+
+        <div class="lanyardBackendColumns">
+            <div>
+                <section class="lanyardBackendPanel">
+                    <div class="lanyardBackendPanelHead">
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="detail.orderer" fallback="Besteller" /></h3>
+                    </div>
+                    <dl class="lanyardBackendFacts">
+                        <dt><ISP.Lanyard:Backend.T id="field.ordererType" fallback="Art" /></dt>
+                        <dd>
+                            <ISP.Lanyard:Backend.T @if.group={props.order.ordererType == 'group'} id="ordererType.group" fallback="Organisation oder Gruppe" />
+                            <ISP.Lanyard:Backend.T @if.private={props.order.ordererType != 'group'} id="ordererType.private" fallback="Privatperson" />
+                        </dd>
+                        <dt @if.hasOrganisation={props.order.organisation}><ISP.Lanyard:Backend.T id="field.organisation" fallback="Organisation" /></dt>
+                        <dd @if.hasOrganisation={props.order.organisation}>{String.htmlSpecialChars(props.order.organisation)}</dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.name" fallback="Name" /></dt>
+                        <dd>{String.htmlSpecialChars(props.order.fullName)}</dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.email" fallback="E-Mail" /></dt>
+                        <dd><a href={'mailto:' + props.order.email}>{String.htmlSpecialChars(props.order.email)}</a></dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.phone" fallback="Telefon" /></dt>
+                        <dd>{props.order.phone ? String.htmlSpecialChars(props.order.phone) : '–'}</dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.language" fallback="Sprache" /></dt>
+                        <dd>{props.order.language}</dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.message" fallback="Nachricht" /></dt>
+                        <dd>{props.order.message ? String.htmlSpecialChars(props.order.message) : '–'}</dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.internalNote" fallback="Interne Notiz" /></dt>
+                        <dd>{props.order.internalNote ? String.htmlSpecialChars(props.order.internalNote) : '–'}</dd>
+                    </dl>
+                </section>
+
+                <section class="lanyardBackendSection">
+                    <header class="lanyardBackendHead">
+                        <h2><ISP.Lanyard:Backend.T id="detail.items" fallback="Tickets" /></h2>
+                    </header>
+                    <div class="lanyardBackendTableWrap">
+                        <table class="lanyardBackendTable">
+                            <thead>
+                                <tr>
+                                    <th><ISP.Lanyard:Backend.T id="field.ticket" fallback="Ticket" /></th>
+                                    <th><ISP.Lanyard:Backend.T id="field.days" fallback="Tage" /></th>
+                                    <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.quantity" fallback="Anzahl" /></th>
+                                    <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.unitPrice" fallback="Einzelpreis" /></th>
+                                    <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.subtotal" fallback="Summe" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Neos.Fusion:Loop items={props.order.items} itemName="item">
+                                    <tr>
+                                        <td>{String.htmlSpecialChars(item.title)}</td>
+                                        <td>{item.days ? String.htmlSpecialChars(item.days) : '–'}</td>
+                                        <td class="lanyardBackendNum">{item.quantity}</td>
+                                        <td class="lanyardBackendNum">{item.unitPrice}</td>
+                                        <td class="lanyardBackendNum">{item.subtotal}</td>
+                                    </tr>
+                                </Neos.Fusion:Loop>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2"><ISP.Lanyard:Backend.T id="field.grandTotal" fallback="Gesamt" /></td>
+                                    <td class="lanyardBackendNum">{props.order.quantity}</td>
+                                    <td></td>
+                                    <td class="lanyardBackendNum">{props.order.total}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="lanyardBackendSection">
+                    <header class="lanyardBackendHead">
+                        <h2><ISP.Lanyard:Backend.T id="detail.history" fallback="Verlauf" /></h2>
+                    </header>
+                    <div class="lanyardBackendTableWrap">
+                        <table class="lanyardBackendTable">
+                            <thead>
+                                <tr>
+                                    <th><ISP.Lanyard:Backend.T id="history.when" fallback="Zeitpunkt" /></th>
+                                    <th><ISP.Lanyard:Backend.T id="history.what" fallback="Vorgang" /></th>
+                                    <th><ISP.Lanyard:Backend.T id="history.who" fallback="Durch" /></th>
+                                    <th><ISP.Lanyard:Backend.T id="history.details" fallback="Details" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Neos.Fusion:Loop items={props.order.history} itemName="entry">
+                                    <tr>
+                                        <td class="lanyardBackendNowrap">{entry.createdAt}</td>
+                                        <td><ISP.Lanyard:Backend.HistoryAction action={entry.action} /></td>
+                                        <td>
+                                            {entry.actorType == 'user' ? String.htmlSpecialChars(entry.actorName) : ''}
+                                            <ISP.Lanyard:Backend.T @if.customer={entry.actorType == 'customer'} id="history.actor.customer" fallback="Besteller" />
+                                            <ISP.Lanyard:Backend.T @if.system={entry.actorType == 'system'} id="history.actor.system" fallback="System" />
+                                            <ISP.Lanyard:Backend.T @if.gateway={entry.actorType == 'gateway'} id="history.actor.gateway" fallback="Zahlungsanbieter" />
+                                        </td>
+                                        <td>{entry.message ? String.htmlSpecialChars(entry.message) : ''}</td>
+                                    </tr>
+                                </Neos.Fusion:Loop>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <aside>
+                <section class="lanyardBackendPanel">
+                    <div class="lanyardBackendPanelHead">
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="detail.progress" fallback="Ablauf" /></h3>
+                    </div>
+                    <dl class="lanyardBackendFacts">
+                        <dt><ISP.Lanyard:Backend.T id="field.createdAt" fallback="Eingang" /></dt>
+                        <dd>{props.order.createdAt}</dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.optInConfirmedAt" fallback="E-Mail bestätigt" /></dt>
+                        <dd>{props.order.optInConfirmedAt || '–'}</dd>
+                        <dt><ISP.Lanyard:Backend.T id="field.updatedAt" fallback="Letzte Änderung" /></dt>
+                        <dd>{props.order.updatedAt}</dd>
+                        <dt @if.hasMethod={props.order.paymentMethod}><ISP.Lanyard:Backend.T id="field.paymentMethod" fallback="Zahlungsart" /></dt>
+                        <dd @if.hasMethod={props.order.paymentMethod}>{String.htmlSpecialChars(props.order.paymentMethod)}</dd>
+                        <dt @if.hasPaymentStatus={props.order.paymentStatus}><ISP.Lanyard:Backend.T id="field.paymentStatus" fallback="Zahlungsstand" /></dt>
+                        <dd @if.hasPaymentStatus={props.order.paymentStatus}><ISP.Lanyard:Backend.PaymentStatusText status={props.order.paymentStatus} /></dd>
+                        <dt @if.hasReference={props.order.paymentReference}><ISP.Lanyard:Backend.T id="field.paymentReference" fallback="Zahlungsreferenz" /></dt>
+                        <dd @if.hasReference={props.order.paymentReference}><span class="lanyardBackendCode">{String.htmlSpecialChars(props.order.paymentReference)}</span></dd>
+                        <dt @if.paid={props.order.paymentDate}><ISP.Lanyard:Backend.T id="field.paymentDate" fallback="Bezahlt am" /></dt>
+                        <dd @if.paid={props.order.paymentDate}>{props.order.paymentDate}</dd>
+                        <dt @if.paid={props.order.paymentDate}><ISP.Lanyard:Backend.T id="field.paymentAmount" fallback="Betrag" /></dt>
+                        <dd @if.paid={props.order.paymentDate}>{props.order.paymentAmount}</dd>
+                        <dt @if.hasReason={props.order.rejectionReason}><ISP.Lanyard:Backend.T id="field.reason" fallback="Begründung" /></dt>
+                        <dd @if.hasReason={props.order.rejectionReason}>{String.htmlSpecialChars(props.order.rejectionReason)}</dd>
+                    </dl>
+                </section>
+
+                <div @if.canManage={props.canManage}>
+                    <p class="lanyardBackendHint" @if.noActions={!props.hasActions}>
+                        <ISP.Lanyard:Backend.T id="detail.noActions" fallback="Für diese Bestellung sind keine Statuswechsel mehr möglich." />
+                    </p>
+
+                    <form @if.can={props.order.can.approve} method="post" action={props.approveUri} class="lanyardBackendPanel lanyardBackendPanel--success lanyardBackendStack">
+                        <ISP.Lanyard:Backend.CsrfField />
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="action.approve" fallback="Freigeben" /></h3>
+                        <span class="lanyardBackendFieldHelp"><ISP.Lanyard:Backend.T id="action.approve.hint" fallback="Gibt die Bestellung frei. Der Besteller erhält die Bestätigung per E-Mail." /></span>
+                        <ISP.Lanyard:Backend.Button variant="primary" icon="check">
+                            <ISP.Lanyard:Backend.T id="action.approve" fallback="Freigeben" />
+                        </ISP.Lanyard:Backend.Button>
+                    </form>
+
+                    <form @if.can={props.order.can.markPaid} method="post" action={props.markPaidUri} class="lanyardBackendPanel lanyardBackendPanel--accent lanyardBackendStack">
+                        <ISP.Lanyard:Backend.CsrfField />
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="action.markPaid" fallback="Als bezahlt markieren" /></h3>
+                        <div class="lanyardBackendField">
+                            <label for="lanyardPaymentMethod"><ISP.Lanyard:Backend.T id="field.paymentMethod" fallback="Zahlungsart" /></label>
+                            <select @if.hasOptions={props.paymentMethodOptions} id="lanyardPaymentMethod" class="lanyardBackendInput" name="moduleArguments[method]">
+                                <Neos.Fusion:Loop items={props.paymentMethodOptions} itemName="option">
+                                    <option value={option.value}>{String.htmlSpecialChars(option.label)}</option>
+                                </Neos.Fusion:Loop>
+                            </select>
+                            <input @if.noOptions={!props.paymentMethodOptions} type="text" id="lanyardPaymentMethod" class="lanyardBackendInput" name="moduleArguments[method]" placeholder="z. B. bar, Überweisung" />
+                        </div>
+                        <ISP.Lanyard:Backend.Button variant="accent" icon="cash">
+                            <ISP.Lanyard:Backend.T id="action.markPaid" fallback="Als bezahlt markieren" />
+                        </ISP.Lanyard:Backend.Button>
+                    </form>
+
+                    <form @if.can={props.order.can.syncPayment} method="post" action={props.syncPaymentUri} class="lanyardBackendPanel lanyardBackendPanel--accent lanyardBackendStack">
+                        <ISP.Lanyard:Backend.CsrfField />
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="action.syncPayment" fallback="Zahlungsstand abfragen" /></h3>
+                        <span class="lanyardBackendFieldHelp"><ISP.Lanyard:Backend.T id="action.syncPayment.hint" fallback="Die Online-Zahlung ist noch offen. Fragt den Stand beim Zahlungsanbieter ab, falls dessen Meldung ausgeblieben ist." /></span>
+                        <ISP.Lanyard:Backend.Button variant="accent" icon="refresh">
+                            <ISP.Lanyard:Backend.T id="action.syncPayment" fallback="Zahlungsstand abfragen" />
+                        </ISP.Lanyard:Backend.Button>
+                    </form>
+
+                    <form @if.can={props.order.can.reject} method="post" action={props.rejectUri} class="lanyardBackendPanel lanyardBackendPanel--danger lanyardBackendStack">
+                        <ISP.Lanyard:Backend.CsrfField />
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="action.reject" fallback="Ablehnen" /></h3>
+                        <div class="lanyardBackendField">
+                            <label for="lanyardRejectReason"><ISP.Lanyard:Backend.T id="action.reject.reason" fallback="Begründung (optional, erscheint in der E-Mail)" /></label>
+                            <textarea id="lanyardRejectReason" class="lanyardBackendInput" name="moduleArguments[reason]" rows="3"></textarea>
+                        </div>
+                        <ISP.Lanyard:Backend.Button variant="danger" icon="x">
+                            <ISP.Lanyard:Backend.T id="action.reject" fallback="Ablehnen" />
+                        </ISP.Lanyard:Backend.Button>
+                    </form>
+
+                    <form @if.can={props.order.can.cancel} method="post" action={props.cancelUri} class="lanyardBackendPanel lanyardBackendPanel--danger lanyardBackendStack">
+                        <ISP.Lanyard:Backend.CsrfField />
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="action.cancel" fallback="Stornieren" /></h3>
+                        <div class="lanyardBackendField">
+                            <span @if.refund={props.order.refundOnCancel} class="lanyardBackendFieldHelp"><ISP.Lanyard:Backend.T id="action.cancel.refund" fallback="Online bezahlt: Der Betrag wird über den Zahlungsanbieter erstattet." /></span>
+                            <span @if.manualRefund={!props.order.refundOnCancel && props.order.status == 'paid'} class="lanyardBackendFieldHelp"><ISP.Lanyard:Backend.T id="action.cancel.manualRefund" fallback="Bereits bezahlt: Eine Erstattung erfolgt nicht automatisch." /></span>
+                            <label for="lanyardCancelReason"><ISP.Lanyard:Backend.T id="action.cancel.reason" fallback="Begründung (optional, erscheint in der E-Mail)" /></label>
+                            <textarea id="lanyardCancelReason" class="lanyardBackendInput" name="moduleArguments[reason]" rows="3"></textarea>
+                        </div>
+                        <ISP.Lanyard:Backend.Button variant="danger" icon="ban">
+                            <ISP.Lanyard:Backend.T id="action.cancel" fallback="Stornieren" />
+                        </ISP.Lanyard:Backend.Button>
+                    </form>
+                </div>
+            </aside>
+        </div>
+    `
+}
+
+##
+# Vorgang im Verlauf als Text.
+#
+prototype(ISP.Lanyard:Backend.HistoryAction) < prototype(Neos.Fusion:Component) {
+    action = ''
+
+    fallbacks = Neos.Fusion:DataStructure {
+        placed = 'Bestellung eingegangen'
+        createdManually = 'Manuell angelegt'
+        optInConfirmed = 'E-Mail-Adresse bestätigt'
+        approved = 'Freigegeben'
+        rejected = 'Abgelehnt'
+        cancelled = 'Storniert'
+        paid = 'Bezahlt'
+        expired = 'Verfallen (nicht bestätigt)'
+        updated = 'Daten geändert'
+        paymentStarted = 'Zahlung gestartet'
+        paymentFailed = 'Zahlung nicht abgeschlossen'
+        refunded = 'Erstattet'
+    }
+
+    renderer = ISP.Lanyard:Backend.T {
+        id = ${'history.action.' + props.action}
+        fallback = ${props.fallbacks[props.action] || props.action}
+    }
+}

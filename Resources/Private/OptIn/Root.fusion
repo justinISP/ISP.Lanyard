@@ -1,0 +1,10 @@
+##
+# Fusion der Opt-in-Bestätigungsseite. Wird nicht über Neos geladen,
+# sondern von der FusionView des OptInControllers, siehe
+# ISP.Lanyard.optIn.fusionPathPatterns.
+#
+include: resource://ISP.Lanyard/Private/Fusion/Helper/Translate.fusion
+include: Integration.fusion
+include: Presentation.fusion
+
+lanyardOptIn = ISP.Lanyard:Integration.OptIn

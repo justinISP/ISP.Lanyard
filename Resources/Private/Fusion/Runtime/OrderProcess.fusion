@@ -1,0 +1,13 @@
+##
+# Einstufiger Formularprozess für Bestellungen. Prüft nach dem Schema
+# die Bestellung als Ganzes, siehe OrderProcessImplementation.
+#
+prototype(ISP.Lanyard:Runtime.OrderProcess) < prototype(Neos.Fusion.Form:Runtime.SingleStepProcess) {
+    @class = 'ISP\\Lanyard\\FusionObjects\\OrderProcessImplementation'
+
+    # Kurzschlüssel des Events, gegen das geprüft wird.
+    eventIdentifier = null
+
+    # Der Absende-Button gehört zur Presentation.
+    footer = null
+}

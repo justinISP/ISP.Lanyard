@@ -1,0 +1,187 @@
+##
+# Arbeitsliste. Kontext aus OrderController::indexAction():
+# orders, total, sums, filter, pagination, statusOptions, eventOptions.
+#
+# Das Filterformular ist ein GET-Formular: Die Action steht als
+# verstecktes Feld darin, weil der Browser den Query-String der
+# Action-URL verwirft.
+#
+prototype(ISP.Lanyard:Backend.Integration.OrderList) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'list'
+
+    content = ISP.Lanyard:Backend.Presentation.OrderList {
+        orders = Neos.Fusion:Map {
+            items = ${orders}
+            itemRenderer = Neos.Fusion:DataStructure {
+                @apply.item = ${item}
+                showUri = Neos.Fusion:UriBuilder {
+                    action = 'show'
+                    arguments.order = ${item.identifier}
+                }
+            }
+        }
+        total = ${total}
+        sums = ${sums}
+        filter = ${filter}
+        statusOptions = ${statusOptions}
+        eventOptions = ${eventOptions}
+        filterUri = Neos.Fusion:UriBuilder {
+            action = 'index'
+        }
+        resetUri = Neos.Fusion:UriBuilder {
+            action = 'index'
+        }
+        exportUri = Neos.Fusion:UriBuilder {
+            action = 'export'
+            format = 'csv'
+            arguments = ${filter}
+        }
+        newUri = Neos.Fusion:UriBuilder {
+            action = 'new'
+            @if.canManage = ${lanyardCan.manageOrders}
+        }
+        page = ${pagination.page}
+        pages = ${pagination.pages}
+        previousUri = Neos.Fusion:UriBuilder {
+            action = 'index'
+            arguments = ${Array.set(filter, 'page', pagination.page - 1)}
+            @if.hasPrevious = ${pagination.page > 1}
+        }
+        nextUri = Neos.Fusion:UriBuilder {
+            action = 'index'
+            arguments = ${Array.set(filter, 'page', pagination.page + 1)}
+            @if.hasNext = ${pagination.page < pagination.pages}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.OrderList) < prototype(Neos.Fusion:Component) {
+
+    # Zeilen aus OrderController::summarise(), ergänzt um showUri
+    orders = ${[]}
+    total = 0
+    # Summen über alle gefilterten Bestellungen: tickets, amount
+    sums = ${{}}
+    filter = ${{}}
+    statusOptions = ${[]}
+    eventOptions = ${[]}
+    filterUri = ''
+    resetUri = ''
+    exportUri = ''
+    # Leer ohne ISP.Lanyard:ManageOrders
+    newUri = null
+    page = 1
+    pages = 1
+    previousUri = null
+    nextUri = null
+
+    renderer = afx`
+        <header class="lanyardBackendHead">
+            <div>
+                <h2><ISP.Lanyard:Backend.T id="list.title" fallback="Bestellungen" /></h2>
+                <p><ISP.Lanyard:Backend.T id="list.description" fallback="Ticketbestellungen prüfen, freigeben und exportieren" /></p>
+            </div>
+            <div class="lanyardBackendHeadActions">
+                <ISP.Lanyard:Backend.Button href={props.exportUri} icon="download">
+                    <ISP.Lanyard:Backend.T id="list.export" fallback="CSV-Export" />
+                </ISP.Lanyard:Backend.Button>
+                <ISP.Lanyard:Backend.Button @if.canManage={props.newUri} href={props.newUri} variant="primary" icon="plus">
+                    <ISP.Lanyard:Backend.T id="list.new" fallback="Manuelle Buchung" />
+                </ISP.Lanyard:Backend.Button>
+            </div>
+        </header>
+
+        <form method="get" action={props.filterUri} class="lanyardBackendFilter">
+            <input type="hidden" name="moduleArguments[@action]" value="index" />
+            <div>
+                <label for="lanyardFilterStatus"><ISP.Lanyard:Backend.T id="field.status" fallback="Status" /></label>
+                <select id="lanyardFilterStatus" class="lanyardBackendInput" name="moduleArguments[status]">
+                    <Neos.Fusion:Loop items={props.statusOptions} itemName="option">
+                        <option value={option} selected={option == props.filter.status}>
+                            <ISP.Lanyard:Backend.StatusText status={option} />
+                        </option>
+                    </Neos.Fusion:Loop>
+                </select>
+            </div>
+            <div>
+                <label for="lanyardFilterEvent"><ISP.Lanyard:Backend.T id="field.event" fallback="Veranstaltung" /></label>
+                <select id="lanyardFilterEvent" class="lanyardBackendInput" name="moduleArguments[event]">
+                    <option value=""><ISP.Lanyard:Backend.T id="filter.allEvents" fallback="Alle Veranstaltungen" /></option>
+                    <Neos.Fusion:Loop items={props.eventOptions} itemName="option">
+                        <option value={option.value} selected={option.value == props.filter.event}>{String.htmlSpecialChars(option.label)}</option>
+                    </Neos.Fusion:Loop>
+                </select>
+            </div>
+            <div>
+                <label for="lanyardFilterSearch"><ISP.Lanyard:Backend.T id="filter.search" fallback="Suche" /></label>
+                <input id="lanyardFilterSearch" class="lanyardBackendInput" type="search" name="moduleArguments[search]" value={props.filter.search} placeholder="Buchungsnummer, Name oder E-Mail" />
+            </div>
+            <div class="lanyardBackendFilterSubmit">
+                <ISP.Lanyard:Backend.Button variant="accent" icon="filter">
+                    <ISP.Lanyard:Backend.T id="filter.submit" fallback="Filtern" />
+                </ISP.Lanyard:Backend.Button>
+                <a href={props.resetUri} class="lanyardBackendLink"><ISP.Lanyard:Backend.T id="filter.reset" fallback="Zurücksetzen" /></a>
+            </div>
+        </form>
+
+        <div class="lanyardBackendResult">
+            <span><ISP.Lanyard:Backend.T id="list.found" fallback="{0} Bestellungen gefunden" arguments={['<strong>' + props.total + '</strong>']} /></span>
+            <span @if.hasOrders={props.total > 0}>
+                <ISP.Lanyard:Backend.T id="list.sums" fallback="{0} Tickets · {1}" arguments={['<strong>' + props.sums.tickets + '</strong>', '<strong>' + props.sums.amount + '</strong>']} />
+            </span>
+        </div>
+
+        <div class="lanyardBackendEmpty" @if.noOrders={!props.orders}>
+            <ISP.Lanyard:Backend.T id="list.empty" fallback="Keine Bestellungen für diese Auswahl." />
+        </div>
+
+        <div class="lanyardBackendTableWrap" @if.hasOrders={props.orders}>
+            <table class="lanyardBackendTable">
+                <thead>
+                    <tr>
+                        <th><ISP.Lanyard:Backend.T id="field.bookingNumber" fallback="Buchungsnummer" /></th>
+                        <th><ISP.Lanyard:Backend.T id="field.createdAt" fallback="Eingang" /></th>
+                        <th><ISP.Lanyard:Backend.T id="field.event" fallback="Veranstaltung" /></th>
+                        <th><ISP.Lanyard:Backend.T id="field.orderer" fallback="Besteller" /></th>
+                        <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.ticketCount" fallback="Tickets" /></th>
+                        <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.total" fallback="Betrag" /></th>
+                        <th><ISP.Lanyard:Backend.T id="field.status" fallback="Status" /></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <Neos.Fusion:Loop items={props.orders} itemName="order">
+                        <tr class={order.closed ? 'lanyardBackendRow--muted' : ''}>
+                            <td><a href={order.showUri} class="lanyardBackendCode">{order.bookingNumber}</a></td>
+                            <td class="lanyardBackendNowrap">
+                                {order.createdDate}
+                                <span class="lanyardBackendSub"><ISP.Lanyard:Backend.T id="list.time" fallback="{0} Uhr" arguments={[order.createdTime]} /></span>
+                            </td>
+                            <td>{String.htmlSpecialChars(order.eventTitle)}</td>
+                            <td>
+                                {String.htmlSpecialChars(order.organisation || order.fullName)}
+                                <span class="lanyardBackendSub">{String.htmlSpecialChars(order.email)}</span>
+                            </td>
+                            <td class="lanyardBackendNum">{order.quantity}</td>
+                            <td class="lanyardBackendNum">{order.total}</td>
+                            <td class="lanyardBackendStatusCell"><ISP.Lanyard:Backend.StatusLabel status={order.status} /></td>
+                            <td class="lanyardBackendActionCell">
+                                <ISP.Lanyard:Backend.IconButton href={order.showUri} icon="eye" labelId="list.show" label="Details ansehen" />
+                            </td>
+                        </tr>
+                    </Neos.Fusion:Loop>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="lanyardBackendPagination" @if.hasPages={props.pages > 1}>
+            <ISP.Lanyard:Backend.Button @if.hasPrevious={props.previousUri} href={props.previousUri} icon="arrowLeft">
+                <ISP.Lanyard:Backend.T id="list.previous" fallback="Zurück" />
+            </ISP.Lanyard:Backend.Button>
+            <span><ISP.Lanyard:Backend.T id="list.page" fallback="Seite {0} von {1}" arguments={[props.page, props.pages]} /></span>
+            <ISP.Lanyard:Backend.Button @if.hasNext={props.nextUri} href={props.nextUri}>
+                <ISP.Lanyard:Backend.T id="list.next" fallback="Weiter" />
+            </ISP.Lanyard:Backend.Button>
+        </div>
+    `
+}

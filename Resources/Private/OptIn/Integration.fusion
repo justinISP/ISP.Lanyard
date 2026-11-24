@@ -1,0 +1,85 @@
+##
+# Übersetzt den Zustand aus dem OptInController in Texte.
+#
+# Kontext aus dem Controller: state, token, bookingNumber, confirmUri,
+# lanyardLanguage.
+#
+prototype(ISP.Lanyard:Integration.OptIn) < prototype(Neos.Fusion:Component) {
+
+    renderer = ISP.Lanyard:Presentation.OptIn.Page {
+        language = ${lanyardLanguage}
+        title = ISP.Lanyard:Translate {
+            source = 'OptIn'
+            id = 'title'
+            fallback = 'Ticketanfrage bestätigen'
+        }
+
+        content = ISP.Lanyard:Presentation.OptIn {
+            state = ${state}
+            token = ${token}
+            confirmUri = ${confirmUri}
+            showButton = ${state == 'pending'}
+
+            message = Neos.Fusion:Case {
+                pending {
+                    condition = ${state == 'pending'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'OptIn'
+                        id = 'pending'
+                        fallback = 'Bitte bestätigen Sie Ihre Ticketanfrage {0}. Erst danach reservieren wir die Plätze und prüfen Ihre Anfrage.'
+                        arguments = ${[bookingNumber]}
+                    }
+                }
+                confirmed {
+                    condition = ${state == 'confirmed'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'OptIn'
+                        id = 'confirmed'
+                        fallback = 'Vielen Dank! Ihre Ticketanfrage {0} ist bestätigt. Wir prüfen sie und melden uns per E-Mail bei Ihnen.'
+                        arguments = ${[bookingNumber]}
+                    }
+                }
+                alreadyConfirmed {
+                    condition = ${state == 'alreadyConfirmed'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'OptIn'
+                        id = 'alreadyConfirmed'
+                        fallback = 'Ihre Ticketanfrage {0} wurde bereits bestätigt.'
+                        arguments = ${[bookingNumber]}
+                    }
+                }
+                expired {
+                    condition = ${state == 'expired'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'OptIn'
+                        id = 'expired'
+                        fallback = 'Dieser Bestätigungslink ist abgelaufen. Bitte stellen Sie Ihre Anfrage erneut.'
+                    }
+                }
+                soldOut {
+                    condition = ${state == 'soldOut'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'OptIn'
+                        id = 'soldOut'
+                        fallback = 'Leider sind inzwischen nicht mehr genügend Plätze frei. Ihre Anfrage {0} konnte nicht bestätigt werden.'
+                        arguments = ${[bookingNumber]}
+                    }
+                }
+                invalid {
+                    condition = true
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'OptIn'
+                        id = 'invalid'
+                        fallback = 'Dieser Bestätigungslink ist ungültig oder wurde bereits verwendet.'
+                    }
+                }
+            }
+
+            buttonLabel = ISP.Lanyard:Translate {
+                source = 'OptIn'
+                id = 'button'
+                fallback = 'Ticketanfrage jetzt bestätigen'
+            }
+        }
+    }
+}

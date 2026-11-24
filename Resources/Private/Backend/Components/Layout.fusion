@@ -1,0 +1,366 @@
+##
+# Text aus ISP.Lanyard/Backend.xlf, mit Rückfalltext.
+#
+prototype(ISP.Lanyard:Backend.T) < prototype(ISP.Lanyard:Translate) {
+    source = 'Backend'
+}
+
+##
+# Rahmen mit Reitern. Die Ziele der Reiter kommen aus dem Controller
+# (lanyardTabs), weil sie über Modulgrenzen hinweg zeigen – der
+# UriBuilder in Fusion erreicht nur den eigenen Controller.
+#
+prototype(ISP.Lanyard:Backend.Integration.Layout) < prototype(ISP.Lanyard:Backend.Presentation.Layout) {
+    listUri = ${lanyardTabs.list}
+    capacityUri = ${lanyardTabs.capacity}
+    pickupUri = ${lanyardTabs.pickup}
+    setupUri = ${lanyardTabs.setup}
+    flashMessages = ${flashMessages}
+}
+
+##
+# Gestaltung im Stil des Neos-Backends: dunkle Flächen, eckige
+# 40-px-Felder und -Buttons, Reiter mit Unterstrich.
+#
+# Jede Seite folgt drei Ebenen: Bereichskopf (.lanyardBackendHead) mit
+# Aktionen, optional Filterleiste (.lanyardBackendFilter), dann das
+# Ergebnis (Summenzeile .lanyardBackendResult und Tabelle).
+#
+prototype(ISP.Lanyard:Backend.Presentation.Layout) < prototype(Neos.Fusion:Component) {
+
+    # 'list', 'capacity', 'pickup' oder 'setup'
+    active = 'list'
+    listUri = ''
+    capacityUri = ''
+    pickupUri = ''
+    # Leer, wenn der Benutzer keine Stammdaten pflegen darf
+    setupUri = null
+    flashMessages = ${[]}
+    content = ''
+
+    styles = '
+        .lanyardBackend {
+            --lanyardBg: #222222;
+            --lanyardRow: #323232;
+            --lanyardRowHover: #3a3a3a;
+            --lanyardControl: #3f3f3f;
+            --lanyardControlHover: #4a4a4a;
+            --lanyardBorder: #3f3f3f;
+            --lanyardText: #ffffff;
+            --lanyardMuted: #999999;
+            --lanyardAccent: #00adee;
+            --lanyardAccentHover: #26bdf2;
+            --lanyardSuccess: #00a338;
+            --lanyardSuccessHover: #00b83f;
+            --lanyardDanger: #ff460d;
+            --lanyardDangerHover: #ff5f2e;
+            --lanyardWarning: #ff8700;
+
+            padding-bottom: 4rem;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--lanyardText);
+        }
+
+        .lanyardBackend *, .lanyardBackend *::before, .lanyardBackend *::after { box-sizing: border-box; }
+        .lanyardBackend a { color: var(--lanyardText); }
+        .lanyardBackend a:hover { color: var(--lanyardAccent); }
+
+        .lanyardBackendIcon {
+            flex: none; width: 16px; height: 16px;
+            fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* Reiter */
+        .lanyardBackendTabs { display: flex; gap: 4px; margin: 0 0 24px; padding: 0; list-style: none; border-bottom: 1px solid var(--lanyardBorder); }
+        .lanyardBackendTab a { display: block; margin-bottom: -1px; padding: 10px 16px; color: var(--lanyardMuted); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; }
+        .lanyardBackendTab a:hover { color: var(--lanyardText); }
+        .lanyardBackendTab--active a { color: var(--lanyardText); font-weight: 600; border-bottom-color: var(--lanyardAccent); }
+
+        /* Ebene 1: Bereichskopf */
+        .lanyardBackendHead { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .lanyardBackendHead h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; padding: 0; font-size: 18px; font-weight: 600; line-height: 1.4; }
+        .lanyardBackendHead p { margin: 2px 0 0; font-size: 13px; color: var(--lanyardMuted); }
+        .lanyardBackendHeadActions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .lanyardBackendBack { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px; font-size: 13px; color: var(--lanyardMuted) !important; text-decoration: none; }
+        .lanyardBackendBack:hover { color: var(--lanyardAccent) !important; }
+
+        /* Buttons */
+        .lanyardBackendButton {
+            display: inline-flex; align-items: center; gap: 8px; height: 40px; margin: 0; padding: 0 16px;
+            font: inherit; color: var(--lanyardText) !important; text-decoration: none; white-space: nowrap; cursor: pointer;
+            background: var(--lanyardControl); border: 0; border-radius: 0; transition: background .15s;
+        }
+        .lanyardBackendButton:hover { background: var(--lanyardAccent); }
+        .lanyardBackendButton--primary { background: var(--lanyardSuccess); }
+        .lanyardBackendButton--primary:hover { background: var(--lanyardSuccessHover); }
+        .lanyardBackendButton--accent { background: var(--lanyardAccent); }
+        .lanyardBackendButton--accent:hover { background: var(--lanyardAccentHover); }
+        .lanyardBackendButton--danger { background: var(--lanyardDanger); }
+        .lanyardBackendButton--danger:hover { background: var(--lanyardDangerHover); }
+        .lanyardBackendLink { font-size: 13px; color: var(--lanyardMuted) !important; text-decoration: none; white-space: nowrap; }
+        .lanyardBackendLink:hover { color: var(--lanyardAccent) !important; }
+        .lanyardBackendInlineForm { display: inline; margin: 0; }
+
+        /* Felder */
+        .lanyardBackendInput {
+            width: 100% !important; height: 40px; margin: 0; padding: 0 12px;
+            font: inherit; color: var(--lanyardText); background: var(--lanyardControl);
+            border: 0; border-radius: 0; box-shadow: none;
+        }
+        textarea.lanyardBackendInput { height: auto; min-height: 96px; padding: 10px 12px; resize: vertical; }
+        .lanyardBackendInput:hover { background: var(--lanyardControlHover); }
+        .lanyardBackendInput:focus { outline: 2px solid var(--lanyardAccent); outline-offset: -2px; }
+        .lanyardBackendInput::placeholder { color: #8a8a8a; }
+        select.lanyardBackendInput {
+            padding-right: 34px; appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23ffffff%27 stroke-width=%272%27%3E%3Cpath d=%27M6 9l6 6 6-6%27/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 14px;
+        }
+        input[type="number"].lanyardBackendInput { width: 96px; }
+        /* Eigene Checkboxen und Radios: Neos Lite.css setzt hellen Rahmen,
+           Ränder und den Fokus-Ring des Browsers, die native Darstellung
+           passt nicht auf den dunklen Grund. .neos davor für die
+           nötige Spezifität. */
+        .neos .lanyardBackend input[type="checkbox"],
+        .neos .lanyardBackend input[type="radio"] {
+            -webkit-appearance: none; appearance: none;
+            display: inline-grid; place-content: center; flex: none;
+            width: 18px; height: 18px; margin: 0; padding: 0;
+            background: var(--lanyardBg); border: 1px solid #6b6b6b; border-radius: 0;
+            cursor: pointer; transition: background .15s, border-color .15s;
+        }
+        .neos .lanyardBackend input[type="radio"] { border-radius: 50%; }
+        .neos .lanyardBackend input[type="checkbox"]:hover,
+        .neos .lanyardBackend input[type="radio"]:hover { border-color: var(--lanyardAccent); }
+        .neos .lanyardBackend input[type="checkbox"]:checked,
+        .neos .lanyardBackend input[type="radio"]:checked { background: var(--lanyardAccent); border-color: var(--lanyardAccent); }
+        .neos .lanyardBackend input[type="checkbox"]:checked::before {
+            content: ""; width: 10px; height: 5px; margin-top: -2px;
+            border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg);
+        }
+        .neos .lanyardBackend input[type="radio"]:checked::before { content: ""; width: 8px; height: 8px; background: #fff; border-radius: 50%; }
+        .neos .lanyardBackend input[type="checkbox"]:focus,
+        .neos .lanyardBackend input[type="radio"]:focus { outline: none; }
+        .neos .lanyardBackend input[type="checkbox"]:focus-visible,
+        .neos .lanyardBackend input[type="radio"]:focus-visible { outline: 2px solid var(--lanyardAccent); outline-offset: 2px; }
+        .neos .lanyardBackend input[type="checkbox"]:disabled,
+        .neos .lanyardBackend input[type="radio"]:disabled { cursor: not-allowed; }
+
+        /* Ebene 2: Filterleiste */
+        .lanyardBackendFilter {
+            display: flex; justify-content: flex-start; gap: 8px; align-items: end; padding: 16px !important;
+            margin: 0; padding: 16px; background: var(--lanyardRow); border-left: 3px solid var(--lanyardAccent);
+        }
+        .lanyardBackendFilter label { display: block; margin-bottom: 4px; font-size: 12px; color: var(--lanyardMuted); }
+        .lanyardBackendFilterSubmit { display: flex; align-items: center; gap: 16px; }
+
+        /* Ebene 3: Summenzeile und Tabelle */
+        .lanyardBackendResult { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 0 8px; font-size: 13px; color: var(--lanyardMuted); }
+        .lanyardBackendResult strong { color: var(--lanyardText); font-weight: 600; }
+        .lanyardBackendTableWrap { overflow-x: auto; }
+        .lanyardBackendTable { width: 100%; margin: 0; border-collapse: collapse; }
+        .lanyardBackendTable th { padding: 8px 16px; font-weight: 600; text-align: left; white-space: nowrap; color: var(--lanyardText); background: none; }
+        .lanyardBackendTable td { height: 56px; padding: 8px 16px; vertical-align: middle; background: var(--lanyardRow); border-top: 1px solid var(--lanyardBg); }
+        .lanyardBackendTable tbody tr:hover td { background: var(--lanyardRowHover); }
+        .lanyardBackendTable td a { text-decoration: none; }
+        .lanyardBackendTable tfoot td { font-weight: 600; background: none; border-top: 1px solid var(--lanyardBorder); }
+        .lanyardBackendNum { text-align: right !important; white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .lanyardBackendNowrap { white-space: nowrap; }
+        .lanyardBackendActionCell { width: 1%; padding: 0 !important; text-align: right; white-space: nowrap; }
+        .lanyardBackendRow--muted td:not(.lanyardBackendActionCell):not(.lanyardBackendStatusCell) { color: var(--lanyardMuted); }
+        .lanyardBackendRow--muted td a { color: var(--lanyardMuted); }
+        .lanyardBackendSub { display: block; font-size: 12px; line-height: 1.4; color: var(--lanyardMuted); }
+        .lanyardBackendCode { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 13px; letter-spacing: .03em; }
+        .lanyardBackendEmpty { padding: 32px 16px; text-align: center; color: var(--lanyardMuted); background: var(--lanyardRow); }
+
+        /* Quadratischer Aktions-Button in Zeilenhöhe */
+        .lanyardBackendIconButton {
+            display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; margin: 0; padding: 0;
+            vertical-align: middle; color: var(--lanyardText) !important; text-decoration: none; cursor: pointer;
+            background: var(--lanyardControl); border: 0; border-radius: 0; transition: background .15s;
+        }
+        .lanyardBackendIconButton:hover { background: var(--lanyardAccent); }
+        .lanyardBackendIconButton--danger:hover { background: var(--lanyardDanger); }
+        .lanyardBackendIconButton + .lanyardBackendInlineForm .lanyardBackendIconButton,
+        .lanyardBackendIconButton + .lanyardBackendIconButton { margin-left: 1px; }
+
+        /* Status */
+        .lanyardStatus { display: inline-block; padding: 1px 8px; font-size: 12px; font-weight: 600; line-height: 20px; color: #fff; white-space: nowrap; background: #5b5b5b; }
+        .lanyardStatus--requested, .lanyardStatus--pendingPayment { background: var(--lanyardWarning); }
+        .lanyardStatus--confirmed { background: var(--lanyardAccent); }
+        .lanyardStatus--paid { background: var(--lanyardSuccess); }
+        .lanyardStatus--rejected, .lanyardStatus--cancelled { background: var(--lanyardDanger); }
+        .lanyardBackendBadge { display: inline-block; padding: 1px 8px; font-size: 12px; font-weight: 600; line-height: 20px; white-space: nowrap; background: var(--lanyardControl); }
+        .lanyardBackendBadge--warning { background: var(--lanyardWarning); }
+        .lanyardBackendBadge--danger { background: var(--lanyardDanger); }
+        .lanyardBackendBadge--success { background: var(--lanyardSuccess); }
+
+        /* Auslastungsbalken */
+        .lanyardBackendBar { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+        .lanyardBackendBarTrack { flex: 1; height: 6px; background: var(--lanyardControl); }
+        .lanyardBackendBarFill { display: block; height: 100%; max-width: 100%; background: var(--lanyardAccent); }
+        .lanyardBackendBarFill--warning { background: var(--lanyardWarning); }
+        .lanyardBackendBarFill--danger { background: var(--lanyardDanger); }
+
+        /* Flächen */
+        .lanyardBackendPanel { margin-bottom: 24px; padding: 20px; background: var(--lanyardRow); }
+        .lanyardBackendPanel--accent { border-left: 3px solid var(--lanyardAccent); }
+        .lanyardBackendPanel--success { border-left: 3px solid var(--lanyardSuccess); }
+        .lanyardBackendPanel--danger { border-left: 3px solid var(--lanyardDanger); }
+        .lanyardBackendPanelHead { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .lanyardBackendPanelTitle { margin: 0; padding: 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--lanyardMuted); }
+        .lanyardBackendSection { margin-top: 32px; }
+        .lanyardBackendSection > .lanyardBackendHead { margin-bottom: 8px; }
+        .lanyardBackendSection > .lanyardBackendHead h2 { font-size: 15px; }
+        .lanyardBackendHint { margin: 0 0 16px; font-size: 13px; color: var(--lanyardMuted); }
+
+        /* Detailansicht: Inhalt links, Aktionen rechts */
+        .lanyardBackendColumns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 24px; align-items: start; }
+        .lanyardBackendFacts { display: grid; grid-template-columns: max-content 1fr; gap: 8px 24px; margin: 0; }
+        .lanyardBackendFacts dt { font-weight: 400; color: var(--lanyardMuted); }
+        .lanyardBackendFacts dd { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+        .lanyardBackendStack { display: grid; gap: 12px; }
+        .lanyardBackendStack .lanyardBackendButton { justify-content: center; width: 100%; }
+
+        /* Formulare */
+        .lanyardBackendForm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; max-width: 960px; margin: 0; }
+        .lanyardBackendField { display: grid; gap: 4px; align-content: start; min-width: 0; }
+        .lanyardBackendField > label:not(.lanyardBackendCheck), .lanyardBackendFieldLabel { font-size: 12px; color: var(--lanyardMuted); }
+        .lanyardBackendField--wide,
+        .lanyardBackendField:has(textarea),
+        .lanyardBackendField:has(.lanyardBackendChoices),
+        .lanyardBackendField:has(.lanyardBackendCheck),
+        .lanyardBackendFormActions,
+        .lanyardBackendForm > .lanyardBackendHint { grid-column: 1 / -1; }
+        /* Paarweise Anordnung: jedes Feld eine Spalte, Checkbox auf Höhe der Eingabefelder */
+        .lanyardBackendForm--pairs > .lanyardBackendField { grid-column: auto; }
+        .lanyardBackendForm--pairs > .lanyardBackendField:has(.lanyardBackendCheck) { padding-top: 22px; }
+        .lanyardBackendField--error .lanyardBackendInput { outline: 2px solid var(--lanyardDanger); outline-offset: -2px; }
+        .lanyardBackendFieldError { font-size: 12px; color: var(--lanyardDanger); }
+        .lanyardBackendFieldHelp { font-size: 12px; color: var(--lanyardMuted); }
+        .lanyardBackendChoices { display: flex; flex-wrap: wrap; gap: 8px; }
+        .lanyardBackendCheck { display: inline-flex !important; align-items: center; gap: 10px; margin: 0; padding: 0 14px; min-height: 50px; cursor: pointer; }
+        .lanyardBackendCheck:hover { background: var(--lanyardControlHover); }
+        .lanyardBackendCheck:has(input:disabled) { opacity: .6; cursor: not-allowed; }
+        .lanyardBackendFormActions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 8px; }
+
+        .lanyardBackendPagination { display: flex; gap: 16px; justify-content: flex-end; align-items: center; padding-top: 16px; color: var(--lanyardMuted); }
+
+        @media (max-width: 1100px) {
+            .lanyardBackendColumns { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 760px) {
+            .lanyardBackendForm { grid-template-columns: 1fr; }
+            .lanyardBackendForm--pairs > .lanyardBackendField:has(.lanyardBackendCheck) { padding-top: 0; }
+            .lanyardBackendFacts { grid-template-columns: 1fr; gap: 2px; }
+            .lanyardBackendFacts dd { margin-bottom: 8px; }
+        }
+    '
+
+    renderer = afx`
+        <style>{props.styles}</style>
+        <div class="neos-content neos-container-fluid lanyardBackend">
+            <ul class="lanyardBackendTabs">
+                <li class={props.active == 'list' ? 'lanyardBackendTab lanyardBackendTab--active' : 'lanyardBackendTab'}>
+                    <a href={props.listUri}><ISP.Lanyard:Backend.T id="nav.list" fallback="Bestellungen" /></a>
+                </li>
+                <li class={props.active == 'capacity' ? 'lanyardBackendTab lanyardBackendTab--active' : 'lanyardBackendTab'}>
+                    <a href={props.capacityUri}><ISP.Lanyard:Backend.T id="nav.capacity" fallback="Auslastung" /></a>
+                </li>
+                <li class={props.active == 'pickup' ? 'lanyardBackendTab lanyardBackendTab--active' : 'lanyardBackendTab'}>
+                    <a href={props.pickupUri}><ISP.Lanyard:Backend.T id="nav.pickup" fallback="Abholliste" /></a>
+                </li>
+                <li @if.canSetup={props.setupUri} class={props.active == 'setup' ? 'lanyardBackendTab lanyardBackendTab--active' : 'lanyardBackendTab'}>
+                    <a href={props.setupUri}><ISP.Lanyard:Backend.T id="nav.setup" fallback="Stammdaten" /></a>
+                </li>
+            </ul>
+            {props.content}
+        </div>
+        <ISP.Lanyard:Backend.Presentation.FlashMessages flashMessages={props.flashMessages} />
+    `
+}
+
+##
+# Flash-Meldungen im Stil der Neos-Notifications.
+#
+prototype(ISP.Lanyard:Backend.Presentation.FlashMessages) < prototype(Neos.Fusion:Component) {
+    flashMessages = ${[]}
+
+    renderer = afx`
+        <div id="neos-notification-container" class="neos-notification-top" @if.hasMessages={props.flashMessages}>
+            <Neos.Fusion:Loop items={props.flashMessages} itemName="message">
+                <div class={'neos-notification neos-notification-' + (message.severity == 'OK' ? 'success' : String.toLowerCase(message.severity))}>
+                    <div class="neos-notification-content">
+                        <div class="neos-notification-heading">{String.htmlSpecialChars(message.message)}</div>
+                    </div>
+                </div>
+            </Neos.Fusion:Loop>
+        </div>
+    `
+}
+
+##
+# Statuswert als Text, mit Kennzeichnung per Klasse.
+#
+prototype(ISP.Lanyard:Backend.StatusText) < prototype(Neos.Fusion:Component) {
+    status = ''
+
+    fallbacks = Neos.Fusion:DataStructure {
+        all = 'Alle Status'
+        pendingPayment = 'Zahlung offen'
+        received = 'E-Mail unbestätigt'
+        requested = 'Wartet auf Freigabe'
+        confirmed = 'Freigegeben'
+        paid = 'Bezahlt'
+        rejected = 'Abgelehnt'
+        cancelled = 'Storniert'
+        expired = 'Verfallen'
+    }
+
+    renderer = ISP.Lanyard:Backend.T {
+        id = ${'status.' + props.status}
+        fallback = ${props.fallbacks[props.status] || props.status}
+    }
+}
+
+##
+# Zahlungsstand (Order::$paymentStatus) als Text.
+#
+prototype(ISP.Lanyard:Backend.PaymentStatusText) < prototype(Neos.Fusion:Component) {
+    status = ''
+
+    fallbacks = Neos.Fusion:DataStructure {
+        open = 'offen'
+        paid = 'bezahlt'
+        failed = 'fehlgeschlagen'
+        cancelled = 'abgebrochen'
+        expired = 'verfallen'
+        refunded = 'erstattet'
+    }
+
+    renderer = ISP.Lanyard:Backend.T {
+        id = ${'paymentStatus.' + props.status}
+        fallback = ${props.fallbacks[props.status] || props.status}
+    }
+}
+
+prototype(ISP.Lanyard:Backend.StatusLabel) < prototype(Neos.Fusion:Component) {
+    status = ''
+
+    renderer = afx`
+        <span class={'lanyardStatus lanyardStatus--' + props.status}>
+            <ISP.Lanyard:Backend.StatusText status={props.status} />
+        </span>
+    `
+}
+
+##
+# Verstecktes CSRF-Feld für POST-Formulare im Modul.
+#
+prototype(ISP.Lanyard:Backend.CsrfField) < prototype(Neos.Fusion:Component) {
+    renderer = afx`
+        <input type="hidden" name="__csrfToken" value={Security.csrfToken()} />
+    `
+}

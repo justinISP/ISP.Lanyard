@@ -1,0 +1,197 @@
+#
+# Defaults des Packages. Alles hier ist dafür gedacht, im
+# Sitepackage überschrieben zu werden – das Package selbst
+# kennt keine konkrete Veranstaltung.
+#
+ISP:
+  Lanyard:
+
+    capacity:
+      # Vorbelegung für neue Veranstaltungstage. Die tatsächliche
+      # Kapazität steht am Tag selbst und ist im Backend änderbar.
+      defaultPerDay: 1000
+
+      # Ab welcher Restmenge die Auslastung im Backend als kritisch
+      # markiert wird – reine Anzeige, keine Sperre.
+      warningThreshold: 50
+
+    order:
+      # Obergrenzen je Besteller-Typ, geprüft bei der Validierung.
+      maxTicketsPerOrder:
+        private: 10
+        group: 100
+
+      # Welche Felder je Besteller-Typ Pflicht sind. Das Formular
+      # liest diese Liste, statt die Regeln fest zu verdrahten.
+      requiredFields:
+        private: ['firstName', 'lastName', 'email', 'privacyConsent']
+        group: ['organisation', 'firstName', 'lastName', 'email', 'phone', 'privacyConsent']
+
+      # Währung für Anzeige und Betragsfelder.
+      currency: 'EUR'
+
+    bookingNumber:
+      length: 10
+      # Base32 ohne I, L, O, U – keine Verwechslung beim Vorlesen,
+      # kein versehentliches Wort.
+      alphabet: '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
+      # Optionales Präfix, z.B. 'WM'. Zählt nicht zur Länge.
+      prefix: ''
+
+    optIn:
+      # Gültigkeit des Bestätigungslinks. Danach verfällt die
+      # Bestellung und gibt ihre Kapazität wieder frei.
+      lifetime: 'PT24H'
+      # Wie oft ein Besteller die Mail erneut anfordern darf.
+      maxResendCount: 3
+      # Ziel des Bestätigungslinks in der Opt-in-Mail. {token} wird
+      # ersetzt. Relative Pfade werden um die Basis-URI ergänzt.
+      # Standard ist die Route des OptInControllers.
+      confirmationUri: '/lanyard/opt-in?token={token}'
+
+      # Fusion für die Bestätigungsseite, gerendert wird der Pfad
+      # 'lanyardOptIn'. Benannte Einträge, damit das Sitepackage eine
+      # eigene Datei anhängen kann, die Prototypen überschreibt.
+      # Ein Eintrag mit leerem Wert wird übersprungen.
+      fusionPathPatterns:
+        neosFusion: 'resource://Neos.Fusion/Private/Fusion/Root.fusion'
+        lanyard: 'resource://ISP.Lanyard/Private/OptIn/Root.fusion'
+
+    payment:
+      # Wie lange eine Online-Bestellung ihre Plätze hält, solange die
+      # Zahlung offen ist. Danach gibt lanyard:expirepayments sie frei.
+      lifetime: 'PT30M'
+
+      # Hierhin schickt das Gateway den Besteller zurück. {token} wird
+      # ersetzt, relative Pfade um die Basis-URI ergänzt.
+      returnUri: '/lanyard/payment/return?token={token}'
+
+      # Webhook für die Statusmeldungen der Gateways. {gateway} ist der
+      # Schlüssel unter payment.gateways.
+      notifyUri: '/lanyard/payment/notify/{gateway}'
+
+      # Zahlungsarten. "online" läuft über ein Gateway, ohne Opt-in und
+      # Freigabe. "offline" läuft über Opt-in und Freigabe, bezahlt
+      # markiert das Orga-Team. Bezeichnungen in ISP.Lanyard/Form.xlf
+      # (paymentMethod.<schlüssel>). Alle aus: Ohne eingeschaltete
+      # Zahlungsart fragt das Formular keine ab.
+      methods:
+        online:
+          enabled: false
+          type: online
+          gateway: test
+          position: 10
+        prepayment:
+          enabled: false
+          type: offline
+          position: 20
+        cash:
+          enabled: false
+          type: offline
+          position: 30
+
+      gateways:
+        # Simuliert einen Zahlungsanbieter. Im Production-Kontext
+        # gesperrt, solange allowInProduction nicht gesetzt ist.
+        test:
+          className: 'ISP\Lanyard\Payment\TestGateway'
+          checkoutUri: '/lanyard/payment/test-gateway?reference={reference}'
+          # Sekunden bis zur Bestätigung beim Ausgang "verzögert"
+          confirmationDelay: 30
+          allowInProduction: false
+
+      # Fusion für Rückkehrseite und Test-Gateway, gerendert wird der
+      # Pfad 'lanyardPayment'. Wie optIn.fusionPathPatterns.
+      fusionPathPatterns:
+        neosFusion: 'resource://Neos.Fusion/Private/Fusion/Root.fusion'
+        lanyard: 'resource://ISP.Lanyard/Private/Payment/Root.fusion'
+
+    spamProtection:
+      # Namen der Honeypot-Felder. Zwei Stück: eines, das ein echtes
+      # Feld doppelt, eines mit plausiblem Fremdnamen.
+      honeypotFields: ['name', 'website']
+
+      # Formulare, die schneller als das abgeschickt werden, sind Bots.
+      minimumFormDuration: 3
+
+      rateLimit:
+        # Bestellungen je IP innerhalb des Zeitfensters.
+        maxAttempts: 5
+        interval: 3600
+
+    mail:
+      senderAddress: ''
+      senderName: ''
+      replyToAddress: ''
+
+      # Empfänger der Benachrichtigung über neue Anfragen.
+      # Leer lassen heisst: keine Benachrichtigung.
+      notificationRecipients: []
+      # Sprache der Benachrichtigung an das Orga-Team.
+      notificationLanguage: 'de'
+
+      # Mail-Templates. Pfade zeigen auf das Package, das Sitepackage
+      # überschreibt sie durch eigene Werte. Ein leerer Pfad schaltet
+      # die jeweilige Mail ab. Jedes Template liefert die Sections
+      # "subject" und "body".
+      templates:
+        optIn: 'resource://ISP.Lanyard/Private/Mail/OptIn.html'
+        confirmed: 'resource://ISP.Lanyard/Private/Mail/Confirmed.html'
+        rejected: 'resource://ISP.Lanyard/Private/Mail/Rejected.html'
+        cancelled: 'resource://ISP.Lanyard/Private/Mail/Cancelled.html'
+        notification: 'resource://ISP.Lanyard/Private/Mail/Notification.html'
+        paid: 'resource://ISP.Lanyard/Private/Mail/Paid.html'
+
+    backend:
+      # Einträge pro Seite in den Listen des Backend-Moduls.
+      itemsPerPage: 25
+
+      # Fusion des Backend-Moduls, benannte Einträge wie bei
+      # optIn.fusionPathPatterns.
+      fusionPathPatterns:
+        lanyard: 'resource://ISP.Lanyard/Private/Backend/Root.fusion'
+
+      csv:
+        delimiter: ';'
+        # BOM, damit Excel UTF-8 korrekt erkennt.
+        includeBom: true
+
+Neos:
+  Flow:
+    mvc:
+      routes:
+        'ISP.Lanyard':
+          position: 'before Neos.Neos'
+  Neos:
+    fusion:
+      autoInclude:
+        'ISP.Lanyard': true
+    # Texte des NodeTypes für die Neos-Oberfläche (Inspector)
+    userInterface:
+      translation:
+        autoInclude:
+          'ISP.Lanyard': ['NodeTypes/*']
+    modules:
+      management:
+        submodules:
+          lanyard:
+            label: 'Tickets'
+            controller: '\ISP\Lanyard\Controller\Module\Management\OrderController'
+            description: 'Ticketbestellungen prüfen und freigeben, Auslastung je Tag'
+            icon: 'fas fa-ticket-alt'
+            privilegeTarget: 'ISP.Lanyard:BackendModule'
+            mainStylesheet: 'Lite'
+            submodules:
+              # Stammdaten, erreichbar über den Reiter im Modul. Abgesichert
+              # über ISP.Lanyard:ManageSetup, nicht über einen
+              # ModulePrivilege – der kann nur zwei Ebenen.
+              setup:
+                label: 'Ticket-Stammdaten'
+                controller: '\ISP\Lanyard\Controller\Module\Management\SetupController'
+                description: 'Veranstaltungen, Tage und Ticketarten pflegen'
+                icon: 'fas fa-cogs'
+                hideInMenu: true
+                mainStylesheet: 'Lite'
+  Fusion:
+    defaultContext:
+      'ISP.Lanyard.OrderForm': 'ISP\Lanyard\Eel\OrderFormHelper'

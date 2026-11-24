@@ -1,0 +1,6 @@
+prototype(ISP.Lanyard:Content.OrderForm) < prototype(Neos.Neos:ContentComponent) {
+
+    renderer = afx`
+        <ISP.Lanyard:Integration.OrderForm />
+    `
+}

@@ -1,0 +1,12 @@
+{namespace f=Neos\FluidAdaptor\ViewHelpers}
+<f:section name="subject"><f:translate id="mail.rejected.subject" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: eventTitle}">Ihre Ticketanfrage – {eventTitle}</f:translate></f:section>
+
+<f:section name="body">
+<p><f:translate id="mail.salutation" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: fullName}">Hallo {fullName},</f:translate></p>
+<p><f:translate id="mail.rejected.intro" package="ISP.Lanyard" source="Mail" locale="{language}">leider können wir Ihre Ticketanfrage nicht annehmen.</f:translate></p>
+<f:if condition="{rejectionReason}">
+    <p><f:translate id="mail.rejected.reason" package="ISP.Lanyard" source="Mail" locale="{language}">Begründung</f:translate>:</p>
+    <p><f:format.nl2br>{rejectionReason}</f:format.nl2br></p>
+</f:if>
+<p><f:translate id="mail.bookingNumber" package="ISP.Lanyard" source="Mail" locale="{language}">Buchungsnummer</f:translate>: <strong>{bookingNumber}</strong></p>
+</f:section>

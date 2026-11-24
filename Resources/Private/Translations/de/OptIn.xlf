@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Bestätigungsseite des Opt-in-Links. Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="OptIn". -->
+    <file original="OptIn" product-name="ISP.Lanyard" source-language="de" datatype="plaintext">
+        <body>
+            <trans-unit id="alreadyConfirmed" xml:space="preserve">
+                <source>Ihre Ticketanfrage {0} wurde bereits bestätigt.</source>
+            </trans-unit>
+            <trans-unit id="button" xml:space="preserve">
+                <source>Ticketanfrage jetzt bestätigen</source>
+            </trans-unit>
+            <trans-unit id="confirmed" xml:space="preserve">
+                <source>Vielen Dank! Ihre Ticketanfrage {0} ist bestätigt. Wir prüfen sie und melden uns per E-Mail bei Ihnen.</source>
+            </trans-unit>
+            <trans-unit id="expired" xml:space="preserve">
+                <source>Dieser Bestätigungslink ist abgelaufen. Bitte stellen Sie Ihre Anfrage erneut.</source>
+            </trans-unit>
+            <trans-unit id="invalid" xml:space="preserve">
+                <source>Dieser Bestätigungslink ist ungültig oder wurde bereits verwendet.</source>
+            </trans-unit>
+            <trans-unit id="pending" xml:space="preserve">
+                <source>Bitte bestätigen Sie Ihre Ticketanfrage {0}. Erst danach reservieren wir die Plätze und prüfen Ihre Anfrage.</source>
+            </trans-unit>
+            <trans-unit id="soldOut" xml:space="preserve">
+                <source>Leider sind inzwischen nicht mehr genügend Plätze frei. Ihre Anfrage {0} konnte nicht bestätigt werden.</source>
+            </trans-unit>
+            <trans-unit id="title" xml:space="preserve">
+                <source>Ticketanfrage bestätigen</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

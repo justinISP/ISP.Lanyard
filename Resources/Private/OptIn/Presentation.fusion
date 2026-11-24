@@ -1,0 +1,55 @@
+##
+# Vollständige HTML-Seite für die Bestätigung, ungestaltet.
+#
+# Das Sitepackage überschreibt diesen Prototyp, um Styles, Logo oder
+# Footer einzubinden – über eine eigene Datei in
+# ISP.Lanyard.optIn.fusionPathPatterns.
+#
+prototype(ISP.Lanyard:Presentation.OptIn.Page) < prototype(Neos.Fusion:Component) {
+
+    language = 'de'
+    title = ''
+    content = ''
+
+    renderer = afx`
+        {'<!DOCTYPE html>'}
+        <html lang={props.language}>
+            <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <meta name="robots" content="noindex, nofollow" />
+                <title>{String.htmlSpecialChars(props.title)}</title>
+            </head>
+            <body>
+                <main class="lanyardOptIn">
+                    <h1>{String.htmlSpecialChars(props.title)}</h1>
+                    {props.content}
+                </main>
+            </body>
+        </html>
+    `
+}
+
+##
+# Meldung zum Zustand und – solange offen – der Bestätigungsbutton.
+#
+prototype(ISP.Lanyard:Presentation.OptIn) < prototype(Neos.Fusion:Component) {
+
+    # pending, confirmed, alreadyConfirmed, expired, soldOut, invalid
+    state = ''
+    message = ''
+    showButton = false
+    token = ''
+    confirmUri = ''
+    buttonLabel = ''
+
+    renderer = afx`
+        <div class={'lanyardOptInMessage lanyardOptInMessage--' + props.state} role="status">
+            <p>{String.htmlSpecialChars(props.message)}</p>
+        </div>
+        <form @if.showButton={props.showButton} method="post" action={props.confirmUri} class="lanyardOptInForm">
+            <input type="hidden" name="token" value={props.token} />
+            <button type="submit">{String.htmlSpecialChars(props.buttonLabel)}</button>
+        </form>
+    `
+}

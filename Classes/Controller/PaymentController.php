@@ -1,0 +1,107 @@
+<?php
+declare(strict_types=1);
+
+namespace ISP\Lanyard\Controller;
+
+use ISP\Lanyard\Domain\Model\Order;
+use ISP\Lanyard\Domain\Model\OrderStatus;
+use ISP\Lanyard\Payment\PaymentException;
+use ISP\Lanyard\Payment\PaymentService;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Controller\ActionController;
+use Neos\Flow\Mvc\View\ViewInterface;
+use Neos\Fusion\View\FusionView;
+
+/**
+ * Rückkehr vom Gateway und Webhook der Online-Zahlung.
+ *
+ * Die Rückkehrseite fragt den Stand selbst beim Gateway ab, statt der
+ * Rückkehr zu glauben: Ein Besteller könnte die URL sonst ohne Zahlung
+ * aufrufen. Gerendert über Fusion, Pfad 'lanyardPayment', Dateien aus
+ * ISP.Lanyard.payment.fusionPathPatterns.
+ */
+class PaymentController extends ActionController
+{
+    public const STATE_PAID = 'paid';
+    public const STATE_PENDING = 'pending';
+    public const STATE_FAILED = 'failed';
+    public const STATE_INVALID = 'invalid';
+
+    /**
+     * @var string
+     */
+    protected $defaultViewObjectName = FusionView::class;
+
+    #[Flow\Inject]
+    protected PaymentService $paymentService;
+
+    // $logger stammt aus dem ActionController.
+
+    #[Flow\InjectConfiguration(path: 'payment.fusionPathPatterns', package: 'ISP.Lanyard')]
+    protected array $fusionPathPatterns = [];
+
+    protected function initializeView(ViewInterface $view): void
+    {
+        if ($view instanceof FusionView) {
+            $view->setFusionPathPatterns(array_values(array_filter($this->fusionPathPatterns)));
+            $view->setFusionPath('lanyardPayment');
+        }
+    }
+
+    public function returnAction(string $token = '', string $back = ''): void
+    {
+        $order = $this->paymentService->findOrderByToken($token);
+
+        if ($order !== null && $order->getStatus() === OrderStatus::PENDING_PAYMENT) {
+            try {
+                $this->paymentService->synchronise($order);
+            } catch (PaymentException $exception) {
+                // Die Seite zeigt dann "wird geprüft", Webhook oder
+                // Verfallskommando holen den Stand nach.
+                $this->logger->warning(sprintf('ISP.Lanyard: Zahlungsstand für %s nicht abrufbar: %s', $order->getBookingNumber(), $exception->getMessage()));
+            }
+        }
+
+        $state = $this->determineState($order);
+
+        $this->view->assignMultiple([
+            'page' => 'return',
+            'lanyardLanguage' => $order !== null ? $order->getLanguage() : 'de',
+            'state' => $state,
+            'bookingNumber' => $order !== null ? (string)$order->getBookingNumber() : '',
+            'email' => $order !== null ? $order->getEmail() : '',
+            'backUri' => $back !== '' ? $this->paymentService->verifyBackUri($back) : null,
+            'reloadUri' => $state === self::STATE_PENDING ? (string)$this->request->getHttpRequest()->getUri() : null,
+        ]);
+    }
+
+    /**
+     * Webhook. Antwortet mit 500, wenn das Gateway nicht erreichbar war –
+     * Anbieter wiederholen die Meldung dann.
+     */
+    #[Flow\SkipCsrfProtection]
+    public function notifyAction(string $gateway): string
+    {
+        $this->response->setContentType('text/plain');
+
+        try {
+            $known = $this->paymentService->handleNotification($gateway, $this->request->getHttpRequest());
+        } catch (PaymentException $exception) {
+            $this->logger->error(sprintf('ISP.Lanyard: Webhook von "%s" nicht verarbeitet: %s', $gateway, $exception->getMessage()));
+            $this->response->setStatusCode(500);
+            return 'error';
+        }
+
+        return $known ? 'ok' : 'ignored';
+    }
+
+    protected function determineState(?Order $order): string
+    {
+        return match (true) {
+            $order === null => self::STATE_INVALID,
+            $order->getStatus() === OrderStatus::PAID => self::STATE_PAID,
+            $order->getStatus() === OrderStatus::PENDING_PAYMENT => self::STATE_PENDING,
+            default => self::STATE_FAILED,
+        };
+    }
+}

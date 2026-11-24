@@ -1,0 +1,17 @@
+#
+# Rate-Limit des Bestellformulars: je IP-Hash die Zeitpunkte der
+# angelegten Bestellungen. Nicht persistent – ein Cache-Flush setzt die
+# Zähler zurück, das ist vertretbar.
+#
+ISP_Lanyard_RateLimit:
+  frontend: Neos\Cache\Frontend\VariableFrontend
+  backend: Neos\Cache\Backend\FileBackend
+
+#
+# Zustand des Test-Gateways – steht für die Daten beim Anbieter und
+# überlebt deshalb einen Cache-Flush.
+#
+ISP_Lanyard_TestGateway:
+  frontend: Neos\Cache\Frontend\VariableFrontend
+  backend: Neos\Cache\Backend\FileBackend
+  persistent: true

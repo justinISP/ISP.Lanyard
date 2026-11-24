@@ -1,0 +1,362 @@
+##
+# Kontaktdaten einer Bestellung, gemeinsam für Bearbeiten und manuelle
+# Buchung. Feldnamen moduleArguments[input][…].
+#
+prototype(ISP.Lanyard:Backend.Presentation.OrderContactFields) < prototype(Neos.Fusion:Component) {
+    values = ${{}}
+    errors = ${{}}
+
+    renderer = afx`
+        <div class={props.errors.ordererType ? 'lanyardBackendField lanyardBackendField--wide lanyardBackendField--error' : 'lanyardBackendField lanyardBackendField--wide'}>
+            <span class="lanyardBackendFieldLabel"><ISP.Lanyard:Backend.T id="field.ordererType" fallback="Art" /></span>
+            <div class="lanyardBackendChoices">
+                <label class="lanyardBackendCheck">
+                    <input type="radio" name="moduleArguments[input][ordererType]" value="private" checked={props.values.ordererType != 'group'} />
+                    <ISP.Lanyard:Backend.T id="ordererType.private" fallback="Privatperson" />
+                </label>
+                <label class="lanyardBackendCheck">
+                    <input type="radio" name="moduleArguments[input][ordererType]" value="group" checked={props.values.ordererType == 'group'} />
+                    <ISP.Lanyard:Backend.T id="ordererType.group" fallback="Organisation oder Gruppe" />
+                </label>
+            </div>
+            <span @if.hasError={props.errors.ordererType} class="lanyardBackendFieldError">{String.htmlSpecialChars(props.errors.ordererType)}</span>
+        </div>
+        <ISP.Lanyard:Backend.Field name="organisation" label="Organisation" help="Bei Organisationen und Gruppen Pflicht." value={props.values.organisation} error={props.errors.organisation} />
+        <div class={props.errors.language ? 'lanyardBackendField lanyardBackendField--error' : 'lanyardBackendField'}>
+            <label for="lanyardField-language"><ISP.Lanyard:Backend.T id="field.mailLanguage" fallback="Sprache der E-Mails" /></label>
+            <select id="lanyardField-language" class="lanyardBackendInput" name="moduleArguments[input][language]">
+                <option value="de" selected={props.values.language != 'en'}>Deutsch</option>
+                <option value="en" selected={props.values.language == 'en'}>English</option>
+            </select>
+            <span @if.hasError={props.errors.language} class="lanyardBackendFieldError">{String.htmlSpecialChars(props.errors.language)}</span>
+        </div>
+        <ISP.Lanyard:Backend.Field name="firstName" label="Vorname" required={true} value={props.values.firstName} error={props.errors.firstName} />
+        <ISP.Lanyard:Backend.Field name="lastName" label="Nachname" required={true} value={props.values.lastName} error={props.errors.lastName} />
+        <ISP.Lanyard:Backend.Field name="email" label="E-Mail" required={true} value={props.values.email} error={props.errors.email} />
+        <ISP.Lanyard:Backend.Field name="phone" label="Telefon" value={props.values.phone} error={props.errors.phone} />
+        <ISP.Lanyard:Backend.Field name="message" type="textarea" label="Nachricht des Bestellers" value={props.values.message} error={props.errors.message} />
+        <ISP.Lanyard:Backend.Field name="internalNote" type="textarea" label="Interne Notiz" help="Nur im Backend sichtbar." value={props.values.internalNote} error={props.errors.internalNote} />
+    `
+}
+
+#
+# Bearbeiten – Kontext: order, values, errors
+#
+prototype(ISP.Lanyard:Backend.Integration.OrderEdit) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'list'
+
+    content = ISP.Lanyard:Backend.Presentation.OrderEdit {
+        order = ${order}
+        values = ${values}
+        errors = ${errors}
+        backUri = Neos.Fusion:UriBuilder {
+            action = 'show'
+            arguments.order = ${order.identifier}
+        }
+        saveUri = Neos.Fusion:UriBuilder {
+            action = 'update'
+            arguments.order = ${order.identifier}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.OrderEdit) < prototype(Neos.Fusion:Component) {
+    order = ${{}}
+    values = ${{}}
+    errors = ${{}}
+    backUri = ''
+    saveUri = ''
+
+    renderer = afx`
+        <a href={props.backUri} class="lanyardBackendBack">
+            <ISP.Lanyard:Backend.Icon name="arrowLeft" />
+            <ISP.Lanyard:Backend.T id="detail.title" fallback="Bestellung {0}" arguments={[props.order.bookingNumber]} />
+        </a>
+
+        <header class="lanyardBackendHead">
+            <div>
+                <h2><ISP.Lanyard:Backend.T id="edit.title" fallback="Bestelldaten bearbeiten" /></h2>
+                <p><ISP.Lanyard:Backend.T id="edit.hint" fallback="Die Tickets lassen sich hier nicht ändern. Für eine andere Menge die Bestellung stornieren und manuell neu buchen." /></p>
+            </div>
+        </header>
+
+        <div class="lanyardBackendPanel lanyardBackendPanel--accent">
+            <form method="post" action={props.saveUri} class="lanyardBackendForm">
+                <ISP.Lanyard:Backend.CsrfField />
+                <ISP.Lanyard:Backend.Presentation.OrderContactFields values={props.values} errors={props.errors} />
+                <div class="lanyardBackendFormActions">
+                    <ISP.Lanyard:Backend.Button variant="primary" icon="check">
+                        <ISP.Lanyard:Backend.T id="setup.save" fallback="Speichern" />
+                    </ISP.Lanyard:Backend.Button>
+                    <a href={props.backUri} class="lanyardBackendLink"><ISP.Lanyard:Backend.T id="setup.cancel" fallback="Abbrechen" /></a>
+                </div>
+            </form>
+        </div>
+    `
+}
+
+#
+# Manuelle Buchung – Kontext: event (null = erst wählen), eventOptions,
+# ticketTypes, values, errors
+#
+# Die Veranstaltungsauswahl ist ein GET-Formular: Die Action steht als
+# verstecktes Feld darin, weil der Browser den Query-String der
+# Action-URL verwirft.
+#
+prototype(ISP.Lanyard:Backend.Integration.OrderNew) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'list'
+
+    content = ISP.Lanyard:Backend.Presentation.OrderNew {
+        event = ${event}
+        eventOptions = ${eventOptions}
+        ticketTypes = ${ticketTypes}
+        values = ${values}
+        errors = ${errors}
+        backUri = Neos.Fusion:UriBuilder {
+            action = 'index'
+        }
+        chooseUri = Neos.Fusion:UriBuilder {
+            action = 'new'
+        }
+        saveUri = Neos.Fusion:UriBuilder {
+            action = 'create'
+            arguments.event = ${event.identifier}
+            @if.hasEvent = ${event}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.OrderNew) < prototype(Neos.Fusion:Component) {
+    event = null
+    eventOptions = ${[]}
+    ticketTypes = ${[]}
+    values = ${{}}
+    errors = ${{}}
+    backUri = ''
+    chooseUri = ''
+    saveUri = null
+
+    renderer = afx`
+        <a href={props.backUri} class="lanyardBackendBack">
+            <ISP.Lanyard:Backend.Icon name="arrowLeft" />
+            <ISP.Lanyard:Backend.T id="detail.back" fallback="Zur Liste" />
+        </a>
+
+        <header class="lanyardBackendHead">
+            <div>
+                <h2><ISP.Lanyard:Backend.T id="new.title" fallback="Manuelle Buchung" /></h2>
+                <p><ISP.Lanyard:Backend.T id="new.hint" fallback="Ohne Bestätigungs-E-Mail, die Plätze werden sofort gebucht. Auch inaktive Ticketarten sind buchbar, z. B. Freikarten." /></p>
+            </div>
+        </header>
+
+        <form method="get" action={props.chooseUri} class="lanyardBackendFilter">
+            <input type="hidden" name="moduleArguments[@action]" value="new" />
+            <div>
+                <label for="lanyardNewEvent"><ISP.Lanyard:Backend.T id="field.event" fallback="Veranstaltung" /></label>
+                <select id="lanyardNewEvent" class="lanyardBackendInput" name="moduleArguments[event]">
+                    <option value=""><ISP.Lanyard:Backend.T id="new.chooseEvent" fallback="Veranstaltung wählen" /></option>
+                    <Neos.Fusion:Loop items={props.eventOptions} itemName="option">
+                        <option value={option.value} selected={props.event && option.value == props.event.identifier}>{String.htmlSpecialChars(option.label)}</option>
+                    </Neos.Fusion:Loop>
+                </select>
+            </div>
+            <div class="lanyardBackendFilterSubmit">
+                <ISP.Lanyard:Backend.Button variant="accent">
+                    <ISP.Lanyard:Backend.T id="new.choose" fallback="Auswählen" />
+                </ISP.Lanyard:Backend.Button>
+            </div>
+        </form>
+
+        <form @if.hasEvent={props.event} method="post" action={props.saveUri}>
+            <ISP.Lanyard:Backend.CsrfField />
+
+            <section class="lanyardBackendSection">
+                <header class="lanyardBackendHead">
+                    <h2><ISP.Lanyard:Backend.T id="detail.items" fallback="Tickets" /></h2>
+                </header>
+                <div class={props.errors.tickets ? 'lanyardBackendField lanyardBackendField--error' : 'lanyardBackendField'}>
+                    <div class="lanyardBackendTableWrap">
+                        <table class="lanyardBackendTable">
+                            <thead>
+                                <tr>
+                                    <th><ISP.Lanyard:Backend.T id="field.ticket" fallback="Ticket" /></th>
+                                    <th><ISP.Lanyard:Backend.T id="field.days" fallback="Tage" /></th>
+                                    <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.unitPrice" fallback="Einzelpreis" /></th>
+                                    <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.quantity" fallback="Anzahl" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Neos.Fusion:Loop items={props.ticketTypes} itemName="ticketType">
+                                    <tr class={ticketType.active ? '' : 'lanyardBackendRow--muted'}>
+                                        <td>
+                                            {String.htmlSpecialChars(ticketType.title)}
+                                            <span @if.inactive={!ticketType.active} class="lanyardBackendSub"><ISP.Lanyard:Backend.T id="new.inactiveHint" fallback="inaktiv – nicht im Formular" /></span>
+                                        </td>
+                                        <td>{ticketType.days ? String.htmlSpecialChars(ticketType.days) : '–'}</td>
+                                        <td class="lanyardBackendNum">{ticketType.price}</td>
+                                        <td class="lanyardBackendNum">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                class="lanyardBackendInput"
+                                                name={'moduleArguments[input][tickets][' + ticketType.identifier + ']'}
+                                                value={props.values.tickets[ticketType.identifier]}
+                                            />
+                                        </td>
+                                    </tr>
+                                </Neos.Fusion:Loop>
+                            </tbody>
+                        </table>
+                    </div>
+                    <span @if.hasError={props.errors.tickets} class="lanyardBackendFieldError">{String.htmlSpecialChars(props.errors.tickets)}</span>
+                </div>
+            </section>
+
+            <section class="lanyardBackendSection">
+                <header class="lanyardBackendHead">
+                    <h2><ISP.Lanyard:Backend.T id="detail.orderer" fallback="Besteller" /></h2>
+                </header>
+                <div class="lanyardBackendPanel lanyardBackendPanel--accent">
+                    <div class="lanyardBackendForm">
+                        <ISP.Lanyard:Backend.Presentation.OrderContactFields values={props.values} errors={props.errors} />
+                        <ISP.Lanyard:Backend.Field name="approved" type="checkbox" label="Sofort freigeben" value={props.values.approved} />
+                        <div class="lanyardBackendFormActions">
+                            <ISP.Lanyard:Backend.Button variant="primary" icon="check">
+                                <ISP.Lanyard:Backend.T id="new.save" fallback="Buchen" />
+                            </ISP.Lanyard:Backend.Button>
+                            <a href={props.backUri} class="lanyardBackendLink"><ISP.Lanyard:Backend.T id="setup.cancel" fallback="Abbrechen" /></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </form>
+    `
+}
+
+#
+# Abholliste – Kontext: day (null = noch keiner gewählt), rows, totals,
+# dayOptions
+#
+# Die Tagesauswahl ist ein GET-Formular, siehe oben.
+#
+prototype(ISP.Lanyard:Backend.Integration.Pickup) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'pickup'
+
+    content = ISP.Lanyard:Backend.Presentation.Pickup {
+        day = ${day}
+        totals = ${totals}
+        dayOptions = ${dayOptions}
+        rows = Neos.Fusion:Map {
+            items = ${rows}
+            itemRenderer = Neos.Fusion:DataStructure {
+                @apply.item = ${item}
+                showUri = Neos.Fusion:UriBuilder {
+                    action = 'show'
+                    arguments.order = ${item.identifier}
+                }
+            }
+        }
+        filterUri = Neos.Fusion:UriBuilder {
+            action = 'pickup'
+        }
+        exportUri = Neos.Fusion:UriBuilder {
+            action = 'pickupExport'
+            format = 'csv'
+            arguments.day = ${day.identifier}
+            @if.hasDay = ${day}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.Pickup) < prototype(Neos.Fusion:Component) {
+    day = null
+    rows = ${[]}
+    # orders, tickets, open (noch zu kassieren)
+    totals = ${{}}
+    dayOptions = ${[]}
+    filterUri = ''
+    exportUri = null
+
+    renderer = afx`
+        <header class="lanyardBackendHead">
+            <div>
+                <h2><ISP.Lanyard:Backend.T id="pickup.title" fallback="Abholliste" /></h2>
+                <p><ISP.Lanyard:Backend.T id="pickup.hint" fallback="Freigegebene und bezahlte Bestellungen mit Tickets für diesen Tag. Noch nicht freigegebene Anfragen fehlen." /></p>
+            </div>
+            <div class="lanyardBackendHeadActions">
+                <ISP.Lanyard:Backend.Button @if.hasDay={props.exportUri} href={props.exportUri} icon="download">
+                    <ISP.Lanyard:Backend.T id="list.export" fallback="CSV-Export" />
+                </ISP.Lanyard:Backend.Button>
+            </div>
+        </header>
+
+        <form method="get" action={props.filterUri} class="lanyardBackendFilter">
+            <input type="hidden" name="moduleArguments[@action]" value="pickup" />
+            <div>
+                <label for="lanyardPickupDay"><ISP.Lanyard:Backend.T id="field.day" fallback="Tag" /></label>
+                <select id="lanyardPickupDay" class="lanyardBackendInput" name="moduleArguments[day]">
+                    <option value=""><ISP.Lanyard:Backend.T id="pickup.chooseDay" fallback="Tag wählen" /></option>
+                    <Neos.Fusion:Loop items={props.dayOptions} itemName="option">
+                        <option value={option.value} selected={props.day && option.value == props.day.identifier}>{String.htmlSpecialChars(option.label)}</option>
+                    </Neos.Fusion:Loop>
+                </select>
+            </div>
+            <div class="lanyardBackendFilterSubmit">
+                <ISP.Lanyard:Backend.Button variant="accent" icon="filter">
+                    <ISP.Lanyard:Backend.T id="pickup.show" fallback="Anzeigen" />
+                </ISP.Lanyard:Backend.Button>
+            </div>
+        </form>
+
+        <div @if.hasDay={props.day}>
+            <div class="lanyardBackendResult">
+                <span><strong>{String.htmlSpecialChars(props.day.label)}</strong></span>
+                <span>
+                    <ISP.Lanyard:Backend.T id="pickup.sums" fallback="{0} Bestellungen · {1} Tickets · offen {2}" arguments={['<strong>' + props.totals.orders + '</strong>', '<strong>' + props.totals.tickets + '</strong>', '<strong>' + props.totals.open + '</strong>']} />
+                </span>
+            </div>
+
+            <div class="lanyardBackendEmpty" @if.noRows={!props.rows}>
+                <ISP.Lanyard:Backend.T id="pickup.empty" fallback="Für diesen Tag gibt es keine freigegebenen Bestellungen." />
+            </div>
+
+            <div class="lanyardBackendTableWrap" @if.hasRows={props.rows}>
+                <table class="lanyardBackendTable">
+                    <thead>
+                        <tr>
+                            <th><ISP.Lanyard:Backend.T id="field.name" fallback="Name" /></th>
+                            <th><ISP.Lanyard:Backend.T id="field.bookingNumber" fallback="Buchungsnummer" /></th>
+                            <th><ISP.Lanyard:Backend.T id="pickup.quantity" fallback="Tickets" /></th>
+                            <th><ISP.Lanyard:Backend.T id="pickup.paid" fallback="Bezahlt" /></th>
+                            <th><ISP.Lanyard:Backend.T id="field.note" fallback="Hinweis" /></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <Neos.Fusion:Loop items={props.rows} itemName="row">
+                            <tr>
+                                <td>
+                                    {String.htmlSpecialChars(row.lastName + ', ' + row.firstName)}
+                                    <span @if.hasOrganisation={row.organisation} class="lanyardBackendSub">{String.htmlSpecialChars(row.organisation)}</span>
+                                </td>
+                                <td><a href={row.showUri} class="lanyardBackendCode">{row.bookingNumber}</a></td>
+                                <td>
+                                    <strong>{row.quantity}</strong>
+                                    <span class="lanyardBackendSub">{String.htmlSpecialChars(row.tickets)}</span>
+                                </td>
+                                <td class="lanyardBackendStatusCell">
+                                    <span @if.paid={row.paid} class="lanyardBackendBadge lanyardBackendBadge--success"><ISP.Lanyard:Backend.T id="pickup.isPaid" fallback="bezahlt" /></span>
+                                    <span @if.open={!row.paid} class="lanyardBackendBadge lanyardBackendBadge--warning"><ISP.Lanyard:Backend.T id="pickup.isOpen" fallback="offen: {0}" arguments={[row.total]} /></span>
+                                </td>
+                                <td>{row.internalNote ? String.htmlSpecialChars(row.internalNote) : ''}</td>
+                                <td class="lanyardBackendActionCell">
+                                    <ISP.Lanyard:Backend.IconButton href={row.showUri} icon="eye" labelId="list.show" label="Details ansehen" />
+                                </td>
+                            </tr>
+                        </Neos.Fusion:Loop>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `
+}

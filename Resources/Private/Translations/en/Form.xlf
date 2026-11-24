@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Bestellformular. Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="Form". -->
+    <file original="Form" product-name="ISP.Lanyard" source-language="de" target-language="en" datatype="plaintext">
+        <body>
+            <trans-unit id="contact" xml:space="preserve">
+                <source>Kontaktdaten</source>
+                <target>Contact details</target>
+            </trans-unit>
+            <trans-unit id="contact.email" xml:space="preserve">
+                <source>E-Mail</source>
+                <target>Email</target>
+            </trans-unit>
+            <trans-unit id="contact.firstName" xml:space="preserve">
+                <source>Vorname</source>
+                <target>First name</target>
+            </trans-unit>
+            <trans-unit id="contact.lastName" xml:space="preserve">
+                <source>Nachname</source>
+                <target>Last name</target>
+            </trans-unit>
+            <trans-unit id="contact.message" xml:space="preserve">
+                <source>Nachricht</source>
+                <target>Message</target>
+            </trans-unit>
+            <trans-unit id="contact.organisation" xml:space="preserve">
+                <source>Name der Organisation oder Gruppe</source>
+                <target>Name of organisation or group</target>
+            </trans-unit>
+            <trans-unit id="contact.phone" xml:space="preserve">
+                <source>Telefon</source>
+                <target>Phone</target>
+            </trans-unit>
+            <trans-unit id="honeypot" xml:space="preserve">
+                <source>Dieses Feld bitte leer lassen</source>
+                <target>Please leave this field empty</target>
+            </trans-unit>
+            <trans-unit id="noEvent" xml:space="preserve">
+                <source>Bitte im Inspector eine aktive Veranstaltung auswählen.</source>
+                <target>Please select an active event in the inspector.</target>
+            </trans-unit>
+            <trans-unit id="ordererType" xml:space="preserve">
+                <source>Ich bestelle als</source>
+                <target>I am ordering as</target>
+            </trans-unit>
+            <trans-unit id="ordererType.group" xml:space="preserve">
+                <source>Organisation oder Gruppe</source>
+                <target>Organisation or group</target>
+            </trans-unit>
+            <trans-unit id="ordererType.private" xml:space="preserve">
+                <source>Privatperson</source>
+                <target>Private person</target>
+            </trans-unit>
+            <trans-unit id="paymentError" xml:space="preserve">
+                <source>Die Zahlung konnte nicht gestartet werden. Ihre Bestellung wurde nicht angelegt, es wurde nichts berechnet. Bitte versuchen Sie es später erneut.</source>
+                <target>The payment could not be started. Your order has not been placed and you have not been charged. Please try again later.</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod" xml:space="preserve">
+                <source>Zahlungsart</source>
+                <target>Payment method</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod.cash" xml:space="preserve">
+                <source>Barzahlung bei Abholung</source>
+                <target>Cash on collection</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod.cash.description" xml:space="preserve">
+                <source>Sie bezahlen beim Abholen der Tickets.</source>
+                <target>You pay when collecting your tickets.</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod.hint" xml:space="preserve">
+                <source>Bei Online-Zahlung sind Ihre Tickets sofort gebucht. Bei den übrigen Zahlungsarten bestätigen Sie zuerst Ihre E-Mail-Adresse, danach prüfen wir Ihre Bestellung.</source>
+                <target>With online payment, your tickets are booked immediately. For the other payment methods, you first confirm your email address, then we review your order.</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod.online" xml:space="preserve">
+                <source>Online bezahlen</source>
+                <target>Pay online</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod.online.description" xml:space="preserve">
+                <source>Sofort gebucht, Bezahlung auf der Seite unseres Zahlungsanbieters.</source>
+                <target>Booked immediately, payment on the page of our payment provider.</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod.prepayment" xml:space="preserve">
+                <source>Vorkasse (Überweisung)</source>
+                <target>Bank transfer in advance</target>
+            </trans-unit>
+            <trans-unit id="paymentMethod.prepayment.description" xml:space="preserve">
+                <source>Überweisung nach Freigabe Ihrer Bestellung.</source>
+                <target>Bank transfer once your order has been approved.</target>
+            </trans-unit>
+            <trans-unit id="privacyConsent" xml:space="preserve">
+                <source>Ich habe die Datenschutzerklärung gelesen und bin mit der Verarbeitung meiner Daten zur Bearbeitung der Bestellung einverstanden.</source>
+                <target>I have read the privacy policy and agree to my data being processed to handle this order.</target>
+            </trans-unit>
+            <trans-unit id="privacyConsent.link" xml:space="preserve">
+                <source>Datenschutzerklärung lesen</source>
+                <target>Read the privacy policy</target>
+            </trans-unit>
+            <trans-unit id="required.always" xml:space="preserve">
+                <source>*</source>
+                <target>*</target>
+            </trans-unit>
+            <trans-unit id="required.group" xml:space="preserve">
+                <source>(Pflicht für Organisationen und Gruppen)</source>
+                <target>(required for organisations and groups)</target>
+            </trans-unit>
+            <trans-unit id="required.hint" xml:space="preserve">
+                <source>Mit * gekennzeichnete Felder sind Pflichtfelder.</source>
+                <target>Fields marked with * are required.</target>
+            </trans-unit>
+            <trans-unit id="required.private" xml:space="preserve">
+                <source>(Pflicht für Privatpersonen)</source>
+                <target>(required for private persons)</target>
+            </trans-unit>
+            <trans-unit id="soldOut" xml:space="preserve">
+                <source>Leider sind inzwischen nicht mehr genügend Plätze frei. Ihre Bestellung wurde nicht angelegt, es wurde nichts berechnet.</source>
+                <target>Unfortunately, there are no longer enough seats available. Your order has not been placed and you have not been charged.</target>
+            </trans-unit>
+            <trans-unit id="submit" xml:space="preserve">
+                <source>Tickets anfragen</source>
+                <target>Request tickets</target>
+            </trans-unit>
+            <trans-unit id="submit.payment" xml:space="preserve">
+                <source>Zahlungspflichtig bestellen</source>
+                <target>Order and pay</target>
+            </trans-unit>
+            <trans-unit id="success" xml:space="preserve">
+                <source>Vielen Dank für Ihre Anfrage! Wir haben Ihnen eine E-Mail geschickt. Bitte bestätigen Sie darin Ihre Adresse – erst dann wird Ihre Anfrage bearbeitet.</source>
+                <target>Thank you for your request! We have sent you an email. Please confirm your address in it – your request will only be processed after that.</target>
+            </trans-unit>
+            <trans-unit id="tickets" xml:space="preserve">
+                <source>Tickets</source>
+                <target>Tickets</target>
+            </trans-unit>
+            <trans-unit id="tickets.days" xml:space="preserve">
+                <source>Tagestickets</source>
+                <target>Day tickets</target>
+            </trans-unit>
+            <trans-unit id="tickets.fromPrice" xml:space="preserve">
+                <source>ab</source>
+                <target>from</target>
+            </trans-unit>
+            <trans-unit id="tickets.hint" xml:space="preserve">
+                <source>Höchstens {0} Tickets pro Bestellung, für Organisationen und Gruppen höchstens {1}.</source>
+                <target>A maximum of {0} tickets per order, {1} for organisations and groups.</target>
+            </trans-unit>
+            <trans-unit id="tickets.none" xml:space="preserve">
+                <source>Derzeit sind keine Tickets verfügbar.</source>
+                <target>No tickets are currently available.</target>
+            </trans-unit>
+            <trans-unit id="tickets.packages" xml:space="preserve">
+                <source>Mehrtagestickets</source>
+                <target>Multi-day tickets</target>
+            </trans-unit>
+            <trans-unit id="tickets.price" xml:space="preserve">
+                <source>Preis</source>
+                <target>Price</target>
+            </trans-unit>
+            <trans-unit id="tickets.quantity" xml:space="preserve">
+                <source>Anzahl</source>
+                <target>Quantity</target>
+            </trans-unit>
+            <trans-unit id="tickets.soldOut" xml:space="preserve">
+                <source>ausverkauft</source>
+                <target>sold out</target>
+            </trans-unit>
+            <trans-unit id="tickets.ticket" xml:space="preserve">
+                <source>Ticket</source>
+                <target>Ticket</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

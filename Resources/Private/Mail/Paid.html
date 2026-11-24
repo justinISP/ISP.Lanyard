@@ -1,0 +1,24 @@
+{namespace f=Neos\FluidAdaptor\ViewHelpers}
+<f:section name="subject"><f:translate id="mail.paid.subject" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: eventTitle, 1: bookingNumber}">Zahlung eingegangen, Ihre Tickets sind gebucht – {eventTitle} ({bookingNumber})</f:translate></f:section>
+
+<f:section name="body">
+<p><f:translate id="mail.salutation" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: fullName}">Hallo {fullName},</f:translate></p>
+<p><f:translate id="mail.paid.intro" package="ISP.Lanyard" source="Mail" locale="{language}">vielen Dank für Ihre Bestellung. Ihre Zahlung ist eingegangen, Ihre Tickets sind gebucht.</f:translate></p>
+<p><f:translate id="mail.bookingNumber" package="ISP.Lanyard" source="Mail" locale="{language}">Buchungsnummer</f:translate>: <strong>{bookingNumber}</strong></p>
+<table>
+    <f:for each="{items}" as="item">
+        <tr>
+            <td>{item.quantity} ×</td>
+            <td>{item.title}<f:if condition="{item.days}"><br /><small>{item.days}</small></f:if></td>
+            <td>{item.subtotal}</td>
+        </tr>
+    </f:for>
+    <tr>
+        <td colspan="2"><f:translate id="mail.total" package="ISP.Lanyard" source="Mail" locale="{language}">Gesamt</f:translate></td>
+        <td>{totalAmount}</td>
+    </tr>
+</table>
+<f:if condition="{paymentMethod}">
+    <p><f:translate id="mail.paymentMethod" package="ISP.Lanyard" source="Mail" locale="{language}">Zahlungsart</f:translate>: {paymentMethod}</p>
+</f:if>
+</f:section>

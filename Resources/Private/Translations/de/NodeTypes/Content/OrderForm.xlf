@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Inspector des Content-Elements "Ticketbestellung". Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="NodeTypes/Content/OrderForm". -->
+    <file original="NodeTypes/Content/OrderForm" product-name="ISP.Lanyard" source-language="de" datatype="plaintext">
+        <body>
+            <trans-unit id="groups.lanyard" xml:space="preserve">
+                <source>Ticketbestellung</source>
+            </trans-unit>
+            <trans-unit id="properties.eventIdentifier" xml:space="preserve">
+                <source>Veranstaltung</source>
+            </trans-unit>
+            <trans-unit id="properties.eventIdentifier.help" xml:space="preserve">
+                <source>Erscheint hier nur, wenn im Backend-Modul ein Kurzschlüssel für die Veranstaltung gepflegt ist.</source>
+            </trans-unit>
+            <trans-unit id="properties.eventIdentifier.placeholder" xml:space="preserve">
+                <source>Veranstaltung wählen</source>
+            </trans-unit>
+            <trans-unit id="properties.privacyPage" xml:space="preserve">
+                <source>Datenschutzerklärung</source>
+            </trans-unit>
+            <trans-unit id="ui.label" xml:space="preserve">
+                <source>Ticketbestellung</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

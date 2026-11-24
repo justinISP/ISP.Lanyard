@@ -1,0 +1,40 @@
+{namespace f=Neos\FluidAdaptor\ViewHelpers}
+<f:section name="subject"><f:if condition="{isOnlinePayment}"><f:then><f:translate id="mail.notification.paid.subject" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: eventTitle, 1: bookingNumber}">Neue bezahlte Bestellung – {eventTitle} ({bookingNumber})</f:translate></f:then><f:else><f:translate id="mail.notification.subject" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: eventTitle, 1: bookingNumber}">Neue Ticketanfrage zur Freigabe – {eventTitle} ({bookingNumber})</f:translate></f:else></f:if></f:section>
+
+<f:section name="body">
+<f:if condition="{isOnlinePayment}">
+    <f:then><p><f:translate id="mail.notification.paid.intro" package="ISP.Lanyard" source="Mail" locale="{language}">Eine neue Bestellung ist online bezahlt eingegangen. Eine Freigabe ist nicht nötig.</f:translate></p></f:then>
+    <f:else><p><f:translate id="mail.notification.intro" package="ISP.Lanyard" source="Mail" locale="{language}">Eine neue Ticketanfrage wartet auf Freigabe.</f:translate></p></f:else>
+</f:if>
+<p><f:translate id="mail.bookingNumber" package="ISP.Lanyard" source="Mail" locale="{language}">Buchungsnummer</f:translate>: <strong>{bookingNumber}</strong></p>
+<table>
+    <f:if condition="{isGroupOrder}">
+        <tr><td><f:translate id="mail.field.organisation" package="ISP.Lanyard" source="Mail" locale="{language}">Organisation</f:translate></td><td>{organisation}</td></tr>
+    </f:if>
+    <f:if condition="{paymentMethod}">
+        <tr><td><f:translate id="mail.paymentMethod" package="ISP.Lanyard" source="Mail" locale="{language}">Zahlungsart</f:translate></td><td>{paymentMethod}</td></tr>
+    </f:if>
+    <tr><td><f:translate id="mail.field.name" package="ISP.Lanyard" source="Mail" locale="{language}">Name</f:translate></td><td>{fullName}</td></tr>
+    <tr><td><f:translate id="mail.field.email" package="ISP.Lanyard" source="Mail" locale="{language}">E-Mail</f:translate></td><td>{order.email}</td></tr>
+    <f:if condition="{order.phone}">
+        <tr><td><f:translate id="mail.field.phone" package="ISP.Lanyard" source="Mail" locale="{language}">Telefon</f:translate></td><td>{order.phone}</td></tr>
+    </f:if>
+</table>
+<table>
+    <f:for each="{items}" as="item">
+        <tr>
+            <td>{item.quantity} ×</td>
+            <td>{item.title}<f:if condition="{item.days}"><br /><small>{item.days}</small></f:if></td>
+            <td>{item.subtotal}</td>
+        </tr>
+    </f:for>
+    <tr>
+        <td colspan="2"><f:translate id="mail.total" package="ISP.Lanyard" source="Mail" locale="{language}">Gesamt</f:translate></td>
+        <td>{totalAmount}</td>
+    </tr>
+</table>
+<f:if condition="{message}">
+    <p><f:translate id="mail.field.message" package="ISP.Lanyard" source="Mail" locale="{language}">Nachricht</f:translate>:</p>
+    <p><f:format.nl2br>{message}</f:format.nl2br></p>
+</f:if>
+</f:section>

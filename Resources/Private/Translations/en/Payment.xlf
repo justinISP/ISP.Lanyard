@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Zahlungsseiten: Rückkehr vom Gateway und Bezahlseite des Test-Gateways. Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="Payment". -->
+    <file original="Payment" product-name="ISP.Lanyard" source-language="de" target-language="en" datatype="plaintext">
+        <body>
+            <trans-unit id="return.back" xml:space="preserve">
+                <source>Erneut bestellen</source>
+                <target>Order again</target>
+            </trans-unit>
+            <trans-unit id="return.failed" xml:space="preserve">
+                <source>Die Zahlung wurde abgebrochen oder ist fehlgeschlagen. Ihre Bestellung {0} ist damit verfallen, die Plätze sind wieder frei. Es wurde nichts abgebucht.</source>
+                <target>The payment was cancelled or has failed. Your order {0} has therefore lapsed and the seats have been released. Nothing has been charged.</target>
+            </trans-unit>
+            <trans-unit id="return.invalid" xml:space="preserve">
+                <source>Diese Bestellung ist uns nicht bekannt.</source>
+                <target>We do not know this order.</target>
+            </trans-unit>
+            <trans-unit id="return.paid" xml:space="preserve">
+                <source>Ihre Zahlung ist eingegangen, Ihre Tickets sind gebucht. Ihre Buchungsnummer lautet {0}. Eine Bestätigung haben wir an {1} geschickt.</source>
+                <target>Your payment has been received and your tickets are booked. Your booking number is {0}. We have sent a confirmation to {1}.</target>
+            </trans-unit>
+            <trans-unit id="return.pending" xml:space="preserve">
+                <source>Die Bestätigung Ihrer Zahlung steht noch aus. Das dauert meist nur wenige Sekunden. Sobald sie da ist, erhalten Sie eine E-Mail an {1}. Ihre Buchungsnummer lautet {0}.</source>
+                <target>Confirmation of your payment is still pending. This usually takes only a few seconds. As soon as it arrives, you will receive an email at {1}. Your booking number is {0}.</target>
+            </trans-unit>
+            <trans-unit id="return.reload" xml:space="preserve">
+                <source>Erneut prüfen</source>
+                <target>Check again</target>
+            </trans-unit>
+            <trans-unit id="return.title.failed" xml:space="preserve">
+                <source>Zahlung nicht abgeschlossen</source>
+                <target>Payment not completed</target>
+            </trans-unit>
+            <trans-unit id="return.title.invalid" xml:space="preserve">
+                <source>Zahlung nicht abgeschlossen</source>
+                <target>Payment not completed</target>
+            </trans-unit>
+            <trans-unit id="return.title.paid" xml:space="preserve">
+                <source>Vielen Dank für Ihre Bestellung</source>
+                <target>Thank you for your order</target>
+            </trans-unit>
+            <trans-unit id="return.title.pending" xml:space="preserve">
+                <source>Zahlung wird geprüft</source>
+                <target>Checking your payment</target>
+            </trans-unit>
+            <trans-unit id="testGateway.closed" xml:space="preserve">
+                <source>Dieser Zahlungsvorgang ist bereits abgeschlossen.</source>
+                <target>This payment has already been completed.</target>
+            </trans-unit>
+            <trans-unit id="testGateway.notice" xml:space="preserve">
+                <source>Dies ist eine simulierte Bezahlseite für Tests. Es wird kein Geld bewegt.</source>
+                <target>This is a simulated payment page for testing. No money is moved.</target>
+            </trans-unit>
+            <trans-unit id="testGateway.outcome.cancelled" xml:space="preserve">
+                <source>Zahlung abbrechen</source>
+                <target>Cancel payment</target>
+            </trans-unit>
+            <trans-unit id="testGateway.outcome.failed" xml:space="preserve">
+                <source>Zahlung fehlgeschlagen</source>
+                <target>Payment failed</target>
+            </trans-unit>
+            <trans-unit id="testGateway.outcome.paid" xml:space="preserve">
+                <source>Zahlung erfolgreich</source>
+                <target>Payment successful</target>
+            </trans-unit>
+            <trans-unit id="testGateway.outcome.paidDelayed" xml:space="preserve">
+                <source>Zahlung erfolgreich, Bestätigung verzögert</source>
+                <target>Payment successful, confirmation delayed</target>
+            </trans-unit>
+            <trans-unit id="testGateway.return" xml:space="preserve">
+                <source>Zurück zum Shop</source>
+                <target>Back to the shop</target>
+            </trans-unit>
+            <trans-unit id="testGateway.title" xml:space="preserve">
+                <source>Test-Zahlung</source>
+                <target>Test payment</target>
+            </trans-unit>
+            <trans-unit id="testGateway.unknown" xml:space="preserve">
+                <source>Dieser Zahlungsvorgang ist nicht bekannt.</source>
+                <target>This payment is unknown.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

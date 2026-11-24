@@ -1,0 +1,563 @@
+##
+# Stammdaten. Kontext aus dem SetupController.
+#
+
+#
+# Event-Liste – Kontext: events
+#
+prototype(ISP.Lanyard:Backend.Integration.Setup.EventList) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'setup'
+
+    content = ISP.Lanyard:Backend.Presentation.Setup.EventList {
+        newUri = Neos.Fusion:UriBuilder {
+            action = 'editEvent'
+        }
+        events = Neos.Fusion:Map {
+            items = ${events}
+            itemRenderer = Neos.Fusion:DataStructure {
+                @apply.item = ${item}
+                editUri = Neos.Fusion:UriBuilder {
+                    action = 'editEvent'
+                    arguments.event = ${item.identifier}
+                }
+            }
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.Setup.EventList) < prototype(Neos.Fusion:Component) {
+    events = ${[]}
+    newUri = ''
+
+    renderer = afx`
+        <header class="lanyardBackendHead">
+            <div>
+                <h2><ISP.Lanyard:Backend.T id="setup.title" fallback="Stammdaten" /></h2>
+                <p><ISP.Lanyard:Backend.T id="setup.description" fallback="Veranstaltungen mit ihren Tagen und Ticketarten" /></p>
+            </div>
+            <div class="lanyardBackendHeadActions">
+                <ISP.Lanyard:Backend.Button href={props.newUri} variant="primary" icon="plus">
+                    <ISP.Lanyard:Backend.T id="setup.event.new" fallback="Neue Veranstaltung" />
+                </ISP.Lanyard:Backend.Button>
+            </div>
+        </header>
+
+        <div class="lanyardBackendEmpty" @if.empty={!props.events}>
+            <ISP.Lanyard:Backend.T id="setup.event.empty" fallback="Noch keine Veranstaltung angelegt." />
+        </div>
+
+        <div class="lanyardBackendTableWrap" @if.hasEvents={props.events}>
+            <table class="lanyardBackendTable">
+                <thead>
+                    <tr>
+                        <th><ISP.Lanyard:Backend.T id="setup.column.title" fallback="Titel" /></th>
+                        <th><ISP.Lanyard:Backend.T id="setup.column.identifier" fallback="Kurzschlüssel" /></th>
+                        <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="setup.event.days" fallback="Tage" /></th>
+                        <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="setup.event.ticketTypes" fallback="Ticketarten" /></th>
+                        <th><ISP.Lanyard:Backend.T id="setup.column.active" fallback="Aktiv" /></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <Neos.Fusion:Loop items={props.events} itemName="event">
+                        <tr class={event.active ? '' : 'lanyardBackendRow--muted'}>
+                            <td><a href={event.editUri}>{String.htmlSpecialChars(event.title)}</a></td>
+                            <td>
+                                <span @if.hasKey={event.key} class="lanyardBackendCode">{String.htmlSpecialChars(event.key)}</span>
+                                <span @if.noKey={!event.key} class="lanyardBackendSub"><ISP.Lanyard:Backend.T id="setup.event.noKey" fallback="ohne – nicht im Formular wählbar" /></span>
+                            </td>
+                            <td class="lanyardBackendNum">{event.dayCount}</td>
+                            <td class="lanyardBackendNum">{event.ticketTypeCount}</td>
+                            <td class="lanyardBackendStatusCell">
+                                <span @if.active={event.active} class="lanyardBackendBadge lanyardBackendBadge--success"><ISP.Lanyard:Backend.T id="setup.active" fallback="aktiv" /></span>
+                                <span @if.inactive={!event.active} class="lanyardBackendBadge"><ISP.Lanyard:Backend.T id="setup.inactive" fallback="inaktiv" /></span>
+                            </td>
+                            <td class="lanyardBackendActionCell">
+                                <ISP.Lanyard:Backend.IconButton href={event.editUri} icon="edit" labelId="setup.edit" label="Bearbeiten" />
+                            </td>
+                        </tr>
+                    </Neos.Fusion:Loop>
+                </tbody>
+            </table>
+        </div>
+    `
+}
+
+#
+# Event mit Tagen und Ticketarten – Kontext: event (null bei neu),
+# values, errors, days, ticketTypes
+#
+prototype(ISP.Lanyard:Backend.Integration.Setup.EventForm) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'setup'
+
+    content = ISP.Lanyard:Backend.Presentation.Setup.EventForm {
+        event = ${event}
+        values = ${values}
+        errors = ${errors}
+        backUri = Neos.Fusion:UriBuilder {
+            action = 'index'
+        }
+        saveUri = Neos.Fusion:UriBuilder {
+            action = 'saveEvent'
+            arguments = ${event ? {event: event.identifier} : {}}
+        }
+        deleteUri = Neos.Fusion:UriBuilder {
+            action = 'deleteEvent'
+            arguments.event = ${event.identifier}
+            @if.hasEvent = ${event}
+        }
+        newDayUri = Neos.Fusion:UriBuilder {
+            action = 'editDay'
+            arguments.event = ${event.identifier}
+            @if.hasEvent = ${event}
+        }
+        newTicketTypeUri = Neos.Fusion:UriBuilder {
+            action = 'editTicketType'
+            arguments.event = ${event.identifier}
+            @if.hasEvent = ${event}
+        }
+        newDayTicketsUri = Neos.Fusion:UriBuilder {
+            action = 'editDayTickets'
+            arguments.event = ${event.identifier}
+            @if.hasEvent = ${event}
+        }
+        days = Neos.Fusion:Map {
+            items = ${days}
+            itemRenderer = Neos.Fusion:DataStructure {
+                @apply.item = ${item}
+                editUri = Neos.Fusion:UriBuilder {
+                    action = 'editDay'
+                    arguments {
+                        event = ${event.identifier}
+                        day = ${item.identifier}
+                    }
+                }
+                deleteUri = Neos.Fusion:UriBuilder {
+                    action = 'deleteDay'
+                    arguments.day = ${item.identifier}
+                }
+            }
+        }
+        ticketTypes = Neos.Fusion:Map {
+            items = ${ticketTypes}
+            itemRenderer = Neos.Fusion:DataStructure {
+                @apply.item = ${item}
+                editUri = Neos.Fusion:UriBuilder {
+                    action = 'editTicketType'
+                    arguments {
+                        event = ${event.identifier}
+                        ticketType = ${item.identifier}
+                    }
+                }
+                deleteUri = Neos.Fusion:UriBuilder {
+                    action = 'deleteTicketType'
+                    arguments.ticketType = ${item.identifier}
+                }
+            }
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.Setup.EventForm) < prototype(Neos.Fusion:Component) {
+    event = null
+    values = ${{}}
+    errors = ${{}}
+    backUri = ''
+    saveUri = ''
+    deleteUri = null
+    newDayUri = null
+    newTicketTypeUri = null
+    newDayTicketsUri = null
+    days = ${[]}
+    ticketTypes = ${[]}
+
+    renderer = afx`
+        <a href={props.backUri} class="lanyardBackendBack">
+            <ISP.Lanyard:Backend.Icon name="arrowLeft" />
+            <ISP.Lanyard:Backend.T id="setup.back" fallback="Zur Übersicht" />
+        </a>
+
+        <header class="lanyardBackendHead">
+            <div>
+                <h2 @if.isNew={!props.event}><ISP.Lanyard:Backend.T id="setup.event.newTitle" fallback="Neue Veranstaltung" /></h2>
+                <h2 @if.isExisting={props.event}>{String.htmlSpecialChars(props.event.title)}</h2>
+                <p><ISP.Lanyard:Backend.T id="setup.event.description" fallback="Grunddaten der Veranstaltung" /></p>
+            </div>
+            <div class="lanyardBackendHeadActions">
+                <ISP.Lanyard:Backend.PostButton @if.hasEvent={props.event} uri={props.deleteUri} labelId="setup.event.delete" label="Veranstaltung löschen" />
+            </div>
+        </header>
+
+        <div class="lanyardBackendPanel lanyardBackendPanel--accent">
+            <form method="post" action={props.saveUri} class="lanyardBackendForm lanyardBackendForm--pairs">
+                <ISP.Lanyard:Backend.CsrfField />
+                <ISP.Lanyard:Backend.Field name="identifier" label="Kurzschlüssel" help="Über diesen Schlüssel wählt das Bestellformular die Veranstaltung, z. B. jugend-wm. Ohne Schlüssel erscheint sie dort nicht." value={props.values.identifier} error={props.errors.identifier} />
+                <ISP.Lanyard:Backend.Field name="active" type="checkbox" label="Aktiv – im Bestellformular buchbar" value={props.values.active} />
+                <ISP.Lanyard:Backend.Field name="title" label="Titel" required={true} value={props.values.title} error={props.errors.title} />
+                <ISP.Lanyard:Backend.Field name="titleEn" label="Titel (englisch)" help="Leer lassen, um den deutschen Titel zu verwenden." value={props.values.titleEn} error={props.errors.titleEn} />
+                <ISP.Lanyard:Backend.Field name="description" type="textarea" label="Beschreibung" value={props.values.description} error={props.errors.description} />
+                <ISP.Lanyard:Backend.Field name="descriptionEn" type="textarea" label="Beschreibung (englisch)" value={props.values.descriptionEn} error={props.errors.descriptionEn} />
+                <div class="lanyardBackendFormActions">
+                    <ISP.Lanyard:Backend.Button variant="primary" icon="check">
+                        <ISP.Lanyard:Backend.T id="setup.save" fallback="Speichern" />
+                    </ISP.Lanyard:Backend.Button>
+                </div>
+            </form>
+        </div>
+
+        <section class="lanyardBackendSection" @if.hasEvent={props.event}>
+            <header class="lanyardBackendHead">
+                <h2><ISP.Lanyard:Backend.T id="setup.event.days" fallback="Tage" /></h2>
+                <div class="lanyardBackendHeadActions">
+                    <ISP.Lanyard:Backend.Button href={props.newDayUri} icon="plus">
+                        <ISP.Lanyard:Backend.T id="setup.day.new" fallback="Tag hinzufügen" />
+                    </ISP.Lanyard:Backend.Button>
+                </div>
+            </header>
+            <div class="lanyardBackendEmpty" @if.noDays={!props.days}>
+                <ISP.Lanyard:Backend.T id="setup.day.empty" fallback="Noch keine Tage angelegt." />
+            </div>
+            <div class="lanyardBackendTableWrap" @if.hasDays={props.days}>
+                <table class="lanyardBackendTable">
+                    <thead>
+                        <tr>
+                            <th><ISP.Lanyard:Backend.T id="setup.column.date" fallback="Datum" /></th>
+                            <th><ISP.Lanyard:Backend.T id="setup.column.title" fallback="Titel" /></th>
+                            <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="setup.column.capacity" fallback="Kapazität" /></th>
+                            <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="setup.day.reserved" fallback="Belegt" /></th>
+                            <th><ISP.Lanyard:Backend.T id="field.status" fallback="Status" /></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <Neos.Fusion:Loop items={props.days} itemName="day">
+                            <tr class={day.closed ? 'lanyardBackendRow--muted' : ''}>
+                                <td class="lanyardBackendNowrap"><a href={day.editUri}>{day.date}</a></td>
+                                <td>{day.title ? String.htmlSpecialChars(day.title) : '–'}</td>
+                                <td class="lanyardBackendNum">{day.capacity}</td>
+                                <td class="lanyardBackendNum">{day.reserved}</td>
+                                <td class="lanyardBackendStatusCell">
+                                    <span @if.closed={day.closed} class="lanyardBackendBadge"><ISP.Lanyard:Backend.T id="capacity.closed" fallback="gesperrt" /></span>
+                                    <span @if.open={!day.closed} class="lanyardBackendBadge lanyardBackendBadge--success"><ISP.Lanyard:Backend.T id="setup.day.open" fallback="buchbar" /></span>
+                                </td>
+                                <td class="lanyardBackendActionCell">
+                                    <ISP.Lanyard:Backend.IconButton href={day.editUri} icon="edit" labelId="setup.edit" label="Bearbeiten" />
+                                    <ISP.Lanyard:Backend.PostButton uri={day.deleteUri} square={true} labelId="setup.delete" label="Löschen" />
+                                </td>
+                            </tr>
+                        </Neos.Fusion:Loop>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="lanyardBackendSection" @if.hasEvent={props.event}>
+            <header class="lanyardBackendHead">
+                <div>
+                    <h2><ISP.Lanyard:Backend.T id="setup.event.ticketTypes" fallback="Ticketarten" /></h2>
+                    <p><ISP.Lanyard:Backend.T id="setup.ticketType.hint" fallback="Tagestickets gelten an genau einem Tag und erscheinen im Formular unter diesem Tag. Ticketarten über mehrere Tage erscheinen dort als Mehrtagestickets." /></p>
+                </div>
+                <div class="lanyardBackendHeadActions">
+                    <ISP.Lanyard:Backend.Button href={props.newTicketTypeUri} icon="plus">
+                        <ISP.Lanyard:Backend.T id="setup.ticketType.new" fallback="Einzelne Ticketart hinzufügen" />
+                    </ISP.Lanyard:Backend.Button>
+                    <ISP.Lanyard:Backend.Button href={props.newDayTicketsUri} variant="primary" icon="ticket">
+                        <ISP.Lanyard:Backend.T id="setup.dayTickets.new" fallback="Tagestickets anlegen" />
+                    </ISP.Lanyard:Backend.Button>
+                </div>
+            </header>
+            <div class="lanyardBackendEmpty" @if.noTicketTypes={!props.ticketTypes}>
+                <ISP.Lanyard:Backend.T id="setup.ticketType.empty" fallback="Noch keine Ticketarten angelegt." />
+            </div>
+            <div class="lanyardBackendTableWrap" @if.hasTicketTypes={props.ticketTypes}>
+                <table class="lanyardBackendTable">
+                    <thead>
+                        <tr>
+                            <th><ISP.Lanyard:Backend.T id="setup.column.title" fallback="Titel" /></th>
+                            <th><ISP.Lanyard:Backend.T id="setup.column.coveredDays" fallback="Tage" /></th>
+                            <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="setup.column.price" fallback="Preis" /></th>
+                            <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="setup.column.maxPerOrder" fallback="Max. pro Bestellung" /></th>
+                            <th><ISP.Lanyard:Backend.T id="setup.column.active" fallback="Aktiv" /></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <Neos.Fusion:Loop items={props.ticketTypes} itemName="ticketType">
+                            <tr class={ticketType.active ? '' : 'lanyardBackendRow--muted'}>
+                                <td><a href={ticketType.editUri}>{String.htmlSpecialChars(ticketType.title)}</a></td>
+                                <td>{ticketType.days ? String.htmlSpecialChars(ticketType.days) : '–'}</td>
+                                <td class="lanyardBackendNum">{ticketType.price}</td>
+                                <td class="lanyardBackendNum">{ticketType.maxPerOrder > 0 ? ticketType.maxPerOrder : '–'}</td>
+                                <td class="lanyardBackendStatusCell">
+                                    <span @if.active={ticketType.active} class="lanyardBackendBadge lanyardBackendBadge--success"><ISP.Lanyard:Backend.T id="setup.active" fallback="aktiv" /></span>
+                                    <span @if.inactive={!ticketType.active} class="lanyardBackendBadge"><ISP.Lanyard:Backend.T id="setup.inactive" fallback="inaktiv" /></span>
+                                </td>
+                                <td class="lanyardBackendActionCell">
+                                    <ISP.Lanyard:Backend.IconButton href={ticketType.editUri} icon="edit" labelId="setup.edit" label="Bearbeiten" />
+                                    <ISP.Lanyard:Backend.PostButton uri={ticketType.deleteUri} square={true} labelId="setup.delete" label="Löschen" />
+                                </td>
+                            </tr>
+                        </Neos.Fusion:Loop>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    `
+}
+
+#
+# Tag – Kontext: event, day (null bei neu), values, errors
+#
+prototype(ISP.Lanyard:Backend.Integration.Setup.DayForm) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'setup'
+
+    content = ISP.Lanyard:Backend.Presentation.Setup.DayForm {
+        event = ${event}
+        day = ${day}
+        values = ${values}
+        errors = ${errors}
+        backUri = Neos.Fusion:UriBuilder {
+            action = 'editEvent'
+            arguments.event = ${event.identifier}
+        }
+        saveUri = Neos.Fusion:UriBuilder {
+            action = 'saveDay'
+            arguments = ${day ? {event: event.identifier, day: day.identifier} : {event: event.identifier}}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.Setup.DayForm) < prototype(Neos.Fusion:Component) {
+    event = ${{}}
+    day = null
+    values = ${{}}
+    errors = ${{}}
+    backUri = ''
+    saveUri = ''
+
+    renderer = afx`
+        <a href={props.backUri} class="lanyardBackendBack">
+            <ISP.Lanyard:Backend.Icon name="arrowLeft" />
+            {String.htmlSpecialChars(props.event.title)}
+        </a>
+
+        <header class="lanyardBackendHead">
+            <div>
+                <h2 @if.isNew={!props.day}><ISP.Lanyard:Backend.T id="setup.day.newTitle" fallback="Neuer Tag" /></h2>
+                <h2 @if.isExisting={props.day}><ISP.Lanyard:Backend.T id="setup.day.editTitle" fallback="Tag bearbeiten" /></h2>
+                <p @if.isExisting={props.day}>
+                    <ISP.Lanyard:Backend.T id="setup.day.reservedHint" fallback="Belegt: {0} Plätze. Die Kapazität darf darunter liegen – der Tag gilt dann als überbucht." arguments={[props.day.reserved]} />
+                </p>
+            </div>
+        </header>
+
+        <div class="lanyardBackendPanel lanyardBackendPanel--accent">
+            <form method="post" action={props.saveUri} class="lanyardBackendForm">
+                <ISP.Lanyard:Backend.CsrfField />
+                <ISP.Lanyard:Backend.Field name="date" type="date" label="Datum" required={true} value={props.values.date} error={props.errors.date} />
+                <ISP.Lanyard:Backend.Field name="capacity" type="number" label="Kapazität" required={true} value={props.values.capacity} error={props.errors.capacity} />
+                <ISP.Lanyard:Backend.Field name="title" labelId="setup.field.dayTitle" helpId="setup.help.dayTitle" label="Eigener Titel" help="Z. B. „Eröffnungsfeier“. Ohne Titel wird das Datum angezeigt." value={props.values.title} error={props.errors.title} />
+                <ISP.Lanyard:Backend.Field name="titleEn" labelId="setup.field.dayTitleEn" label="Eigener Titel (englisch)" value={props.values.titleEn} error={props.errors.titleEn} />
+                <ISP.Lanyard:Backend.Field name="closed" type="checkbox" label="Gesperrt – keine neuen Bestellungen für diesen Tag" value={props.values.closed} />
+                <div class="lanyardBackendFormActions">
+                    <ISP.Lanyard:Backend.Button variant="primary" icon="check">
+                        <ISP.Lanyard:Backend.T id="setup.save" fallback="Speichern" />
+                    </ISP.Lanyard:Backend.Button>
+                    <a href={props.backUri} class="lanyardBackendLink"><ISP.Lanyard:Backend.T id="setup.cancel" fallback="Abbrechen" /></a>
+                </div>
+            </form>
+        </div>
+    `
+}
+
+#
+# Ticketart – Kontext: event, ticketType (null bei neu), values,
+# errors, days
+#
+# Sind die Tage gesperrt, werden die Checkboxen deaktiviert und die
+# bisherige Auswahl als Hidden-Felder mitgeschickt – deaktivierte
+# Checkboxen sendet der Browser nicht, die Prüfung sähe sonst eine
+# Änderung.
+#
+prototype(ISP.Lanyard:Backend.Integration.Setup.TicketTypeForm) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'setup'
+
+    content = ISP.Lanyard:Backend.Presentation.Setup.TicketTypeForm {
+        event = ${event}
+        ticketType = ${ticketType}
+        values = ${values}
+        errors = ${errors}
+        days = ${days}
+        backUri = Neos.Fusion:UriBuilder {
+            action = 'editEvent'
+            arguments.event = ${event.identifier}
+        }
+        saveUri = Neos.Fusion:UriBuilder {
+            action = 'saveTicketType'
+            arguments = ${ticketType ? {event: event.identifier, ticketType: ticketType.identifier} : {event: event.identifier}}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.Setup.TicketTypeForm) < prototype(Neos.Fusion:Component) {
+    event = ${{}}
+    ticketType = null
+    values = ${{}}
+    errors = ${{}}
+    days = ${[]}
+    backUri = ''
+    saveUri = ''
+
+    locked = ${this.ticketType && this.ticketType.coverageLocked}
+
+    renderer = afx`
+        <a href={props.backUri} class="lanyardBackendBack">
+            <ISP.Lanyard:Backend.Icon name="arrowLeft" />
+            {String.htmlSpecialChars(props.event.title)}
+        </a>
+
+        <header class="lanyardBackendHead">
+            <div>
+                <h2 @if.isNew={!props.ticketType}><ISP.Lanyard:Backend.T id="setup.ticketType.newTitle" fallback="Neue Ticketart" /></h2>
+                <h2 @if.isExisting={props.ticketType}><ISP.Lanyard:Backend.T id="setup.ticketType.editTitle" fallback="Ticketart bearbeiten" /></h2>
+            </div>
+        </header>
+
+        <div class="lanyardBackendPanel lanyardBackendPanel--accent">
+            <form method="post" action={props.saveUri} class="lanyardBackendForm">
+                <ISP.Lanyard:Backend.CsrfField />
+                <ISP.Lanyard:Backend.Field name="title" label="Titel" required={true} value={props.values.title} error={props.errors.title} />
+                <ISP.Lanyard:Backend.Field name="titleEn" label="Titel (englisch)" value={props.values.titleEn} error={props.errors.titleEn} />
+                <ISP.Lanyard:Backend.Field name="price" label="Preis in Euro" help="Z. B. 18,50" required={true} value={props.values.price} error={props.errors.price} />
+                <ISP.Lanyard:Backend.Field name="maxPerOrder" type="number" label="Höchstens pro Bestellung" help="0 = nur die allgemeine Grenze gilt." value={props.values.maxPerOrder} error={props.errors.maxPerOrder} />
+
+                <div class={props.errors.coveredDays ? 'lanyardBackendField lanyardBackendField--error' : 'lanyardBackendField'}>
+                    <span class="lanyardBackendFieldLabel"><ISP.Lanyard:Backend.T id="setup.field.coveredDays" fallback="Gilt an folgenden Tagen" /></span>
+                    <span @if.noDays={!props.days} class="lanyardBackendFieldHelp">
+                        <ISP.Lanyard:Backend.T id="setup.help.noDays" fallback="Legen Sie zuerst Tage für die Veranstaltung an." />
+                    </span>
+                    <div class="lanyardBackendChoices">
+                        <Neos.Fusion:Loop items={props.days} itemName="day">
+                            <label class="lanyardBackendCheck">
+                                <input
+                                    type="checkbox"
+                                    name={props.locked ? null : 'moduleArguments[input][coveredDays][]'}
+                                    value={day.identifier}
+                                    checked={Array.indexOf(props.values.coveredDays, day.identifier) > -1}
+                                    disabled={props.locked}
+                                />
+                                {String.htmlSpecialChars(day.label)}
+                            </label>
+                        </Neos.Fusion:Loop>
+                    </div>
+                    <Neos.Fusion:Loop @if.locked={props.locked} items={props.values.coveredDays} itemName="dayIdentifier">
+                        <input type="hidden" name="moduleArguments[input][coveredDays][]" value={dayIdentifier} />
+                    </Neos.Fusion:Loop>
+                    <span @if.locked={props.locked} class="lanyardBackendFieldHelp">
+                        <ISP.Lanyard:Backend.T id="setup.help.coverageLocked" fallback="Für diese Ticketart sind bereits Plätze gebucht – die Tage lassen sich nicht mehr ändern." />
+                    </span>
+                    <span @if.hasError={props.errors.coveredDays} class="lanyardBackendFieldError">{String.htmlSpecialChars(props.errors.coveredDays)}</span>
+                </div>
+
+                <ISP.Lanyard:Backend.Field name="description" type="textarea" label="Beschreibung" value={props.values.description} error={props.errors.description} />
+                <ISP.Lanyard:Backend.Field name="descriptionEn" type="textarea" label="Beschreibung (englisch)" value={props.values.descriptionEn} error={props.errors.descriptionEn} />
+                <ISP.Lanyard:Backend.Field name="sortingIndex" type="number" label="Reihenfolge" value={props.values.sortingIndex} error={props.errors.sortingIndex} />
+                <ISP.Lanyard:Backend.Field name="active" type="checkbox" label="Aktiv – im Bestellformular buchbar" value={props.values.active} />
+                <div class="lanyardBackendFormActions">
+                    <ISP.Lanyard:Backend.Button variant="primary" icon="check">
+                        <ISP.Lanyard:Backend.T id="setup.save" fallback="Speichern" />
+                    </ISP.Lanyard:Backend.Button>
+                    <a href={props.backUri} class="lanyardBackendLink"><ISP.Lanyard:Backend.T id="setup.cancel" fallback="Abbrechen" /></a>
+                </div>
+            </form>
+        </div>
+    `
+}
+
+#
+# Tagestickets für mehrere Tage auf einmal – Kontext: event, values,
+# errors, days. Legt je gewähltem Tag eine eigene Ticketart an.
+#
+prototype(ISP.Lanyard:Backend.Integration.Setup.DayTicketsForm) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'setup'
+
+    content = ISP.Lanyard:Backend.Presentation.Setup.DayTicketsForm {
+        event = ${event}
+        values = ${values}
+        errors = ${errors}
+        days = ${days}
+        backUri = Neos.Fusion:UriBuilder {
+            action = 'editEvent'
+            arguments.event = ${event.identifier}
+        }
+        saveUri = Neos.Fusion:UriBuilder {
+            action = 'saveDayTickets'
+            arguments.event = ${event.identifier}
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.Setup.DayTicketsForm) < prototype(Neos.Fusion:Component) {
+    event = ${{}}
+    values = ${{}}
+    errors = ${{}}
+    days = ${[]}
+    backUri = ''
+    saveUri = ''
+
+    renderer = afx`
+        <a href={props.backUri} class="lanyardBackendBack">
+            <ISP.Lanyard:Backend.Icon name="arrowLeft" />
+            {String.htmlSpecialChars(props.event.title)}
+        </a>
+
+        <header class="lanyardBackendHead">
+            <div>
+                <h2><ISP.Lanyard:Backend.T id="setup.dayTickets.title" fallback="Tagestickets anlegen" /></h2>
+                <p><ISP.Lanyard:Backend.T id="setup.dayTickets.hint" fallback="Für jeden gewählten Tag entsteht eine eigene Ticketart mit diesen Angaben. Für weitere Preisstufen (z. B. ermäßigt) das Formular erneut ausfüllen." /></p>
+            </div>
+        </header>
+
+        <div class="lanyardBackendPanel lanyardBackendPanel--accent">
+            <form method="post" action={props.saveUri} class="lanyardBackendForm">
+                <ISP.Lanyard:Backend.CsrfField />
+                <ISP.Lanyard:Backend.Field name="title" helpId="setup.help.dayTicketTitle" label="Titel" help="Z. B. „Tagesticket Erwachsene“. Der Tag steht im Formular als Überschrift darüber." required={true} value={props.values.title} error={props.errors.title} />
+                <ISP.Lanyard:Backend.Field name="titleEn" label="Titel (englisch)" value={props.values.titleEn} error={props.errors.titleEn} />
+                <ISP.Lanyard:Backend.Field name="price" label="Preis in Euro" help="Z. B. 18,50" required={true} value={props.values.price} error={props.errors.price} />
+                <ISP.Lanyard:Backend.Field name="maxPerOrder" type="number" label="Höchstens pro Bestellung" help="0 = nur die allgemeine Grenze gilt." value={props.values.maxPerOrder} error={props.errors.maxPerOrder} />
+
+                <div class={props.errors.coveredDays ? 'lanyardBackendField lanyardBackendField--error' : 'lanyardBackendField'}>
+                    <span class="lanyardBackendFieldLabel"><ISP.Lanyard:Backend.T id="setup.field.dayTicketDays" fallback="Für folgende Tage anlegen" /></span>
+                    <span @if.noDays={!props.days} class="lanyardBackendFieldHelp">
+                        <ISP.Lanyard:Backend.T id="setup.help.noDays" fallback="Legen Sie zuerst Tage für die Veranstaltung an." />
+                    </span>
+                    <div class="lanyardBackendChoices">
+                        <Neos.Fusion:Loop items={props.days} itemName="day">
+                            <label class="lanyardBackendCheck">
+                                <input
+                                    type="checkbox"
+                                    name="moduleArguments[input][coveredDays][]"
+                                    value={day.identifier}
+                                    checked={Array.indexOf(props.values.coveredDays, day.identifier) > -1}
+                                />
+                                {String.htmlSpecialChars(day.label)}
+                            </label>
+                        </Neos.Fusion:Loop>
+                    </div>
+                    <span @if.hasError={props.errors.coveredDays} class="lanyardBackendFieldError">{String.htmlSpecialChars(props.errors.coveredDays)}</span>
+                </div>
+
+                <ISP.Lanyard:Backend.Field name="description" type="textarea" label="Beschreibung" value={props.values.description} error={props.errors.description} />
+                <ISP.Lanyard:Backend.Field name="descriptionEn" type="textarea" label="Beschreibung (englisch)" value={props.values.descriptionEn} error={props.errors.descriptionEn} />
+                <ISP.Lanyard:Backend.Field name="sortingIndex" type="number" label="Reihenfolge" help="Reihenfolge innerhalb eines Tages, z. B. Erwachsene vor Ermäßigt." value={props.values.sortingIndex} error={props.errors.sortingIndex} />
+                <ISP.Lanyard:Backend.Field name="active" type="checkbox" label="Aktiv – im Bestellformular buchbar" value={props.values.active} />
+                <div class="lanyardBackendFormActions">
+                    <ISP.Lanyard:Backend.Button variant="primary" icon="ticket">
+                        <ISP.Lanyard:Backend.T id="setup.dayTickets.save" fallback="Tagestickets anlegen" />
+                    </ISP.Lanyard:Backend.Button>
+                    <a href={props.backUri} class="lanyardBackendLink"><ISP.Lanyard:Backend.T id="setup.cancel" fallback="Abbrechen" /></a>
+                </div>
+            </form>
+        </div>
+    `
+}

@@ -1,0 +1,67 @@
+#
+# Bestätigungslink aus der Opt-in-Mail. Der Token kommt als
+# Query-Parameter: /lanyard/opt-in?token=…
+#
+-
+  name: 'Opt-in: Seite mit Bestätigungsbutton'
+  uriPattern: 'lanyard/opt-in'
+  defaults:
+    '@package': 'ISP.Lanyard'
+    '@controller': 'OptIn'
+    '@action': 'show'
+    '@format': 'html'
+  httpMethods: ['GET']
+
+-
+  name: 'Opt-in: Bestätigung absenden'
+  uriPattern: 'lanyard/opt-in'
+  defaults:
+    '@package': 'ISP.Lanyard'
+    '@controller': 'OptIn'
+    '@action': 'confirm'
+    '@format': 'html'
+  httpMethods: ['POST']
+
+#
+# Online-Zahlung: Rückkehr vom Gateway, Webhook, Bezahlseite des
+# Test-Gateways.
+#
+-
+  name: 'Zahlung: Rückkehr vom Gateway'
+  uriPattern: 'lanyard/payment/return'
+  defaults:
+    '@package': 'ISP.Lanyard'
+    '@controller': 'Payment'
+    '@action': 'return'
+    '@format': 'html'
+  httpMethods: ['GET']
+
+-
+  name: 'Zahlung: Webhook'
+  uriPattern: 'lanyard/payment/notify/{gateway}'
+  defaults:
+    '@package': 'ISP.Lanyard'
+    '@controller': 'Payment'
+    '@action': 'notify'
+    '@format': 'html'
+  httpMethods: ['POST']
+
+-
+  name: 'Test-Gateway: Bezahlseite'
+  uriPattern: 'lanyard/payment/test-gateway'
+  defaults:
+    '@package': 'ISP.Lanyard'
+    '@controller': 'TestGateway'
+    '@action': 'show'
+    '@format': 'html'
+  httpMethods: ['GET']
+
+-
+  name: 'Test-Gateway: Ausgang wählen'
+  uriPattern: 'lanyard/payment/test-gateway'
+  defaults:
+    '@package': 'ISP.Lanyard'
+    '@controller': 'TestGateway'
+    '@action': 'decide'
+    '@format': 'html'
+  httpMethods: ['POST']

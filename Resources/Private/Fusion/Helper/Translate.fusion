@@ -1,0 +1,13 @@
+##
+# Text aus ISP.Lanyard/<source>.xlf in der Sprache der Bestellung.
+# Fehlt die Übersetzung, erscheint der Rückfalltext.
+#
+prototype(ISP.Lanyard:Translate) < prototype(Neos.Fusion:Value) {
+    id = ''
+    fallback = ''
+    arguments = ${[]}
+    source = 'Form'
+    language = ${lanyardLanguage || 'de'}
+
+    value = ${I18n.id(this.id).package('ISP.Lanyard').source(this.source).value(this.fallback).arguments(this.arguments).locale(this.language).translate()}
+}

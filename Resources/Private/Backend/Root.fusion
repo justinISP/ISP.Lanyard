@@ -1,0 +1,31 @@
+##
+# Fusion des Backend-Moduls. Geladen über Configuration/Views.yaml, nicht
+# über Neos – deshalb werden Neos.Fusion und der Übersetzungs-Helfer hier
+# ausdrücklich eingebunden.
+#
+include: resource://Neos.Fusion/Private/Fusion/Root.fusion
+include: resource://ISP.Lanyard/Private/Fusion/Helper/Translate.fusion
+include: Components/*.fusion
+include: Views/*.fusion
+
+# Pfade nach dem Muster der FusionView: <Controller-Klasse ohne
+# "Controller\">/<Action>
+ISP.Lanyard.Module.Management.OrderController {
+    index = ISP.Lanyard:Backend.Integration.OrderList
+    show = ISP.Lanyard:Backend.Integration.OrderDetail
+    capacity = ISP.Lanyard:Backend.Integration.Capacity
+    pickup = ISP.Lanyard:Backend.Integration.Pickup
+    # Auch von updateAction/createAction bei Fehlern gerendert
+    edit = ISP.Lanyard:Backend.Integration.OrderEdit
+    new = ISP.Lanyard:Backend.Integration.OrderNew
+}
+
+# Die save*-Actions rendern bei Fehlern das jeweilige edit*-Formular,
+# der Pfad wird im SetupController gesetzt.
+ISP.Lanyard.Module.Management.SetupController {
+    index = ISP.Lanyard:Backend.Integration.Setup.EventList
+    editEvent = ISP.Lanyard:Backend.Integration.Setup.EventForm
+    editDay = ISP.Lanyard:Backend.Integration.Setup.DayForm
+    editTicketType = ISP.Lanyard:Backend.Integration.Setup.TicketTypeForm
+    editDayTickets = ISP.Lanyard:Backend.Integration.Setup.DayTicketsForm
+}

@@ -1,0 +1,23 @@
+##
+# Fusion der Zahlungsseiten: Rückkehr vom Gateway und Bezahlseite des
+# Test-Gateways. Geladen von PaymentController und
+# TestGatewayController, siehe ISP.Lanyard.payment.fusionPathPatterns.
+#
+# Die Seitenhülle erbt von ISP.Lanyard:Presentation.OptIn.Page – wer
+# die im Sitepackage gestaltet, gestaltet die Zahlungsseiten mit.
+#
+include: resource://ISP.Lanyard/Private/Fusion/Helper/Translate.fusion
+include: resource://ISP.Lanyard/Private/OptIn/Presentation.fusion
+include: Integration.fusion
+include: Presentation.fusion
+
+lanyardPayment = Neos.Fusion:Case {
+    testGateway {
+        condition = ${page == 'testGateway'}
+        renderer = ISP.Lanyard:Integration.Payment.TestGateway
+    }
+    return {
+        condition = true
+        renderer = ISP.Lanyard:Integration.Payment.Return
+    }
+}

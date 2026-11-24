@@ -1,0 +1,305 @@
+##
+# Bestellformular in ungestalteter Grundform.
+#
+# Bekommt nur flache Daten und fertig übersetzte Texte. Das
+# Sitepackage überschreibt diesen Prototyp für eigenes Markup. Die
+# Feldnamen müssen dabei erhalten bleiben, das Schema steht in der
+# Integration.
+#
+# Die Honeypot-Felder tragen die Klasse .lanyardOrderFormHoneypot und
+# müssen im Sitepackage per CSS ausgeblendet werden.
+#
+prototype(ISP.Lanyard:Presentation.OrderForm) < prototype(Neos.Fusion:Component) {
+
+    # Aus ISP.Lanyard.OrderForm.ticketGroups(): packages (Mehrtagestickets)
+    # und days (je Tag die Tagestickets)
+    ticketGroups = ${{packages: [], days: []}}
+
+    # Alle Tage aufgeklappt, z. B. wenn das Formular mit Fehlern
+    # zurückkommt. Bei nur einem Tag ist er immer offen.
+    expandDays = false
+
+    # Feld => 'always', 'group' oder 'private'
+    fieldRequirements = ${{}}
+
+    # Aus ISP.Lanyard.OrderForm.paymentMethods(): [{value, label,
+    # description, online}]. Leer: keine Abfrage.
+    paymentMethods = ${[]}
+
+    honeypotFields = ${[]}
+    privacyUri = null
+    labels = ${{}}
+
+    # Styles nur einmal je Seite ausgeben, auch bei mehreren Formularen.
+    renderStyles = true
+
+    integration = ${'<style data-slipstream>' + ISP.Skeleton.Minify.minifyCSS(this.styles) + '</style>'}
+    integration.@if.renderStyles = ${this.renderStyles}
+
+    styles = '
+        .lanyardOrderForm {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .lanyardOrderFormSection {
+            display: grid;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        .lanyardOrderFormField label {
+            display: block;
+        }
+
+        .lanyardOrderFormField--choice label {
+            display: inline-block;
+            margin-right: 1.5rem;
+        }
+
+        .lanyardOrderFormField input:not([type="checkbox"]):not([type="radio"]),
+        .lanyardOrderFormField textarea {
+            width: 100%;
+        }
+
+        .lanyardOrderFormTicketTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .lanyardOrderFormTicketTable th,
+        .lanyardOrderFormTicketTable td {
+            padding: .5rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .lanyardOrderFormTicketTable input {
+            width: 5rem;
+        }
+
+        .lanyardOrderFormTicketGroup {
+            display: grid;
+            gap: .5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .lanyardOrderFormTicketGroupTitle {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .lanyardOrderFormDay summary {
+            cursor: pointer;
+            padding: .5rem 0;
+        }
+
+        .lanyardOrderFormDayPrice {
+            opacity: .7;
+        }
+
+        .lanyardOrderFormPaymentMethods label {
+            display: block;
+        }
+
+        .lanyardOrderFormPaymentDescription {
+            display: block;
+            opacity: .7;
+        }
+    '
+
+    renderer = afx`
+        {props.integration}
+
+        <fieldset class="lanyardOrderFormSection">
+            <legend>{props.labels.ordererType}</legend>
+            <Neos.Fusion.Form:FieldContainer field.name="ordererType" class="lanyardOrderFormField lanyardOrderFormField--choice">
+                <Neos.Fusion.Form:Radio field.value="private">{props.labels.ordererTypePrivate}</Neos.Fusion.Form:Radio>
+                <Neos.Fusion.Form:Radio field.value="group">{props.labels.ordererTypeGroup}</Neos.Fusion.Form:Radio>
+            </Neos.Fusion.Form:FieldContainer>
+        </fieldset>
+
+        <fieldset class="lanyardOrderFormSection">
+            <legend>{props.labels.tickets}</legend>
+            <p>{props.labels.ticketsHint}</p>
+            <Neos.Fusion.Form:FieldContainer field.name="tickets" class="lanyardOrderFormField lanyardOrderFormTickets">
+                <p @if.noTickets={!props.ticketGroups.packages && !props.ticketGroups.days}>{props.labels.noTickets}</p>
+
+                <div class="lanyardOrderFormTicketGroup" @if.hasPackages={props.ticketGroups.packages}>
+                    <p class="lanyardOrderFormTicketGroupTitle">{props.labels.packages}</p>
+                    <ISP.Lanyard:Presentation.OrderForm.TicketTable tickets={props.ticketGroups.packages} labels={props.labels} />
+                </div>
+
+                <div class="lanyardOrderFormTicketGroup" @if.hasDays={props.ticketGroups.days}>
+                    <p class="lanyardOrderFormTicketGroupTitle">{props.labels.dayTickets}</p>
+                    <Neos.Fusion:Loop items={props.ticketGroups.days} itemName="day">
+                        <details
+                            class={day.bookable ? 'lanyardOrderFormDay' : 'lanyardOrderFormDay lanyardOrderFormDay--soldOut'}
+                            open={props.expandDays || Array.length(props.ticketGroups.days) == 1}
+                        >
+                            <summary>
+                                <span class="lanyardOrderFormDayLabel">{String.htmlSpecialChars(day.label)}</span>
+                                {' '}
+                                <span class="lanyardOrderFormDayPrice">{day.bookable ? props.labels.fromPrice + ' ' + day.fromPrice : props.labels.soldOut}</span>
+                            </summary>
+                            <ISP.Lanyard:Presentation.OrderForm.TicketTable tickets={day.tickets} labels={props.labels} />
+                        </details>
+                    </Neos.Fusion:Loop>
+                </div>
+            </Neos.Fusion.Form:FieldContainer>
+        </fieldset>
+
+        <fieldset class="lanyardOrderFormSection">
+            <legend>{props.labels.contact}</legend>
+            <p>{props.labels.requiredHint}</p>
+            <ISP.Lanyard:Presentation.OrderForm.TextField name="organisation" label={props.labels.organisation} requirement={props.fieldRequirements.organisation} labels={props.labels} autocomplete="organization" />
+            <ISP.Lanyard:Presentation.OrderForm.TextField name="firstName" label={props.labels.firstName} requirement={props.fieldRequirements.firstName} labels={props.labels} autocomplete="given-name" />
+            <ISP.Lanyard:Presentation.OrderForm.TextField name="lastName" label={props.labels.lastName} requirement={props.fieldRequirements.lastName} labels={props.labels} autocomplete="family-name" />
+            <ISP.Lanyard:Presentation.OrderForm.TextField name="email" type="email" label={props.labels.email} requirement={props.fieldRequirements.email} labels={props.labels} autocomplete="email" />
+            <ISP.Lanyard:Presentation.OrderForm.TextField name="phone" type="tel" label={props.labels.phone} requirement={props.fieldRequirements.phone} labels={props.labels} autocomplete="tel" />
+            <ISP.Lanyard:Presentation.OrderForm.TextField name="message" multiline={true} label={props.labels.message} requirement={props.fieldRequirements.message} labels={props.labels} />
+
+            <Neos.Fusion.Form:FieldContainer field.name="privacyConsent" class="lanyardOrderFormField lanyardOrderFormField--choice">
+                <Neos.Fusion.Form:Checkbox field.value="1" attributes.required={props.fieldRequirements.privacyConsent == 'always'}>
+                    {props.labels.privacyConsent}
+                </Neos.Fusion.Form:Checkbox>
+                <a @if.hasUri={props.privacyUri} href={props.privacyUri} target="_blank" rel="noopener">{props.labels.privacyLink}</a>
+            </Neos.Fusion.Form:FieldContainer>
+        </fieldset>
+
+        <fieldset class="lanyardOrderFormSection" @if.hasPaymentMethods={props.paymentMethods}>
+            <legend>{props.labels.paymentMethod}</legend>
+            <p>{props.labels.paymentMethodHint}</p>
+            <Neos.Fusion.Form:FieldContainer field.name="paymentMethod" class="lanyardOrderFormField lanyardOrderFormField--choice lanyardOrderFormPaymentMethods">
+                <Neos.Fusion:Loop items={props.paymentMethods} itemName="method">
+                    <Neos.Fusion.Form:Radio field.value={method.value}>
+                        <span class="lanyardOrderFormPaymentLabel">{String.htmlSpecialChars(method.label)}</span>
+                        <span @if.hasDescription={method.description} class="lanyardOrderFormPaymentDescription">{String.htmlSpecialChars(method.description)}</span>
+                    </Neos.Fusion.Form:Radio>
+                </Neos.Fusion:Loop>
+            </Neos.Fusion.Form:FieldContainer>
+        </fieldset>
+
+        <Neos.Fusion:Loop items={props.honeypotFields} itemName="honeypot">
+            <Neos.Fusion.Form:FieldContainer field.name={honeypot} label={props.labels.honeypot} class="lanyardOrderFormHoneypot" attributes.aria-hidden="true">
+                <Neos.Fusion.Form:Input attributes.autocomplete="one-time-code" attributes.tabindex="-1" />
+            </Neos.Fusion.Form:FieldContainer>
+        </Neos.Fusion:Loop>
+
+        <Neos.Fusion.Form:FieldContainer field.name="formToken" class="lanyardOrderFormField">
+            <Neos.Fusion.Form:Hidden />
+        </Neos.Fusion.Form:FieldContainer>
+
+        <div class="lanyardOrderFormActions">
+            <Neos.Fusion.Form:Button>{props.paymentMethods ? props.labels.submitPayment : props.labels.submit}</Neos.Fusion.Form:Button>
+        </div>
+    `
+
+    # Fehler aus ISP.Lanyard/ValidationErrors.xlf statt aus Neos.Flow –
+    # alle Fehler des Formulars kommen aus dem OrderFormService.
+    prototype(Neos.Fusion.Form:FieldContainer) {
+        class = 'lanyardOrderFormField'
+        errorClass = 'lanyardOrderFormField--error'
+        errorRenderer = 'ISP.Lanyard:Presentation.OrderForm.Errors'
+    }
+}
+
+prototype(ISP.Lanyard:Presentation.OrderForm.TicketTable) < prototype(Neos.Fusion:Component) {
+
+    tickets = ${[]}
+    labels = ${{}}
+
+    renderer = afx`
+        <table class="lanyardOrderFormTicketTable">
+            <thead>
+                <tr>
+                    <th>{props.labels.ticket}</th>
+                    <th>{props.labels.price}</th>
+                    <th>{props.labels.quantity}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <Neos.Fusion:Loop items={props.tickets} itemName="ticket">
+                    <ISP.Lanyard:Presentation.OrderForm.TicketRow ticket={ticket} soldOutLabel={props.labels.soldOut} />
+                </Neos.Fusion:Loop>
+            </tbody>
+        </table>
+    `
+}
+
+prototype(ISP.Lanyard:Presentation.OrderForm.TicketRow) < prototype(Neos.Fusion:Component) {
+
+    ticket = ${{}}
+    soldOutLabel = ''
+
+    renderer = afx`
+        <tr class={props.ticket.bookable ? 'lanyardOrderFormTicket' : 'lanyardOrderFormTicket lanyardOrderFormTicket--soldOut'}>
+            <td>
+                <label for={'lanyardTicket-' + props.ticket.identifier}>{String.htmlSpecialChars(props.ticket.title)}</label>
+                <p @if.hasDescription={props.ticket.description}>{String.htmlSpecialChars(props.ticket.description)}</p>
+            </td>
+            <td>{props.ticket.price}</td>
+            <td>
+                <Neos.Fusion.Form:Input
+                    @if.bookable={props.ticket.bookable}
+                    field.name={'tickets[' + props.ticket.identifier + ']'}
+                    attributes.id={'lanyardTicket-' + props.ticket.identifier}
+                    attributes.type="number"
+                    attributes.min="0"
+                    attributes.max={props.ticket.maxQuantity}
+                    attributes.inputmode="numeric"
+                />
+                <span @if.soldOut={!props.ticket.bookable}>{props.soldOutLabel}</span>
+            </td>
+        </tr>
+    `
+}
+
+prototype(ISP.Lanyard:Presentation.OrderForm.TextField) < prototype(Neos.Fusion:Component) {
+
+    name = ''
+    label = ''
+    type = 'text'
+    multiline = false
+    autocomplete = null
+
+    # 'always', 'group', 'private' oder null
+    requirement = null
+    labels = ${{}}
+
+    marker = ${this.requirement == 'always' ? ' ' + this.labels.requiredAlways : (this.requirement == 'group' ? ' ' + this.labels.requiredGroup : (this.requirement == 'private' ? ' ' + this.labels.requiredPrivate : ''))}
+
+    renderer = afx`
+        <Neos.Fusion.Form:FieldContainer field.name={props.name} label={props.label + props.marker}>
+            <Neos.Fusion.Form:Input
+                @if.singleLine={!props.multiline}
+                attributes.type={props.type}
+                attributes.autocomplete={props.autocomplete}
+                attributes.required={props.requirement == 'always'}
+            />
+            <Neos.Fusion.Form:Textarea @if.multiline={props.multiline} attributes.rows="5" />
+        </Neos.Fusion.Form:FieldContainer>
+    `
+}
+
+prototype(ISP.Lanyard:Presentation.OrderForm.Errors) < prototype(Neos.Fusion.Form:ErrorRenderer) {
+    class = 'lanyardOrderFormErrors'
+    translationPackage = 'ISP.Lanyard'
+    translationSource = 'ValidationErrors'
+}
+
+##
+# Hinweis nach dem Absenden und im Backend.
+#
+prototype(ISP.Lanyard:Presentation.OrderForm.Message) < prototype(Neos.Fusion:Component) {
+
+    text = ''
+
+    renderer = afx`
+        <div class="lanyardOrderFormMessage" role="status">
+            <p>{props.text}</p>
+        </div>
+    `
+}

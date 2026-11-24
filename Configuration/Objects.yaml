@@ -1,0 +1,19 @@
+ISP\Lanyard\Service\RateLimitService:
+  properties:
+    cache:
+      object:
+        factoryObjectName: Neos\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: ISP_Lanyard_RateLimit
+
+ISP\Lanyard\Payment\TestGateway:
+  properties:
+    cache:
+      object:
+        factoryObjectName: Neos\Flow\Cache\CacheManager
+        factoryMethodName: getCache
+        arguments:
+          1:
+            value: ISP_Lanyard_TestGateway

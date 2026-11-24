@@ -1,0 +1,135 @@
+##
+# Rückkehrseite. Kontext aus PaymentController::returnAction():
+# state (paid, pending, failed, invalid), bookingNumber, email, backUri,
+# reloadUri, lanyardLanguage.
+#
+prototype(ISP.Lanyard:Integration.Payment.Return) < prototype(Neos.Fusion:Component) {
+
+    renderer = ISP.Lanyard:Presentation.Payment.Page {
+        language = ${lanyardLanguage}
+        title = ISP.Lanyard:Translate {
+            source = 'Payment'
+            id = ${'return.title.' + state}
+            fallback = ${state == 'paid' ? 'Vielen Dank für Ihre Bestellung' : (state == 'pending' ? 'Zahlung wird geprüft' : 'Zahlung nicht abgeschlossen')}
+        }
+
+        content = ISP.Lanyard:Presentation.Payment.Return {
+            state = ${state}
+
+            message = Neos.Fusion:Case {
+                paid {
+                    condition = ${state == 'paid'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'Payment'
+                        id = 'return.paid'
+                        fallback = 'Ihre Zahlung ist eingegangen, Ihre Tickets sind gebucht. Ihre Buchungsnummer lautet {0}. Eine Bestätigung haben wir an {1} geschickt.'
+                        arguments = ${[bookingNumber, email]}
+                    }
+                }
+                pending {
+                    condition = ${state == 'pending'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'Payment'
+                        id = 'return.pending'
+                        fallback = 'Die Bestätigung Ihrer Zahlung steht noch aus. Das dauert meist nur wenige Sekunden. Sobald sie da ist, erhalten Sie eine E-Mail an {1}. Ihre Buchungsnummer lautet {0}.'
+                        arguments = ${[bookingNumber, email]}
+                    }
+                }
+                failed {
+                    condition = ${state == 'failed'}
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'Payment'
+                        id = 'return.failed'
+                        fallback = 'Die Zahlung wurde abgebrochen oder ist fehlgeschlagen. Ihre Bestellung {0} ist damit verfallen, die Plätze sind wieder frei. Es wurde nichts abgebucht.'
+                        arguments = ${[bookingNumber]}
+                    }
+                }
+                invalid {
+                    condition = true
+                    renderer = ISP.Lanyard:Translate {
+                        source = 'Payment'
+                        id = 'return.invalid'
+                        fallback = 'Diese Bestellung ist uns nicht bekannt.'
+                    }
+                }
+            }
+
+            reloadUri = ${reloadUri}
+            reloadLabel = ISP.Lanyard:Translate {
+                source = 'Payment'
+                id = 'return.reload'
+                fallback = 'Erneut prüfen'
+            }
+
+            backUri = ${state == 'paid' || state == 'pending' ? null : backUri}
+            backLabel = ISP.Lanyard:Translate {
+                source = 'Payment'
+                id = 'return.back'
+                fallback = 'Erneut bestellen'
+            }
+        }
+    }
+}
+
+##
+# Bezahlseite des Test-Gateways. Kontext aus
+# TestGatewayController::showAction(): state (open, closed, unknown),
+# reference, description, amount, email, returnUri, decideUri, outcomes.
+#
+prototype(ISP.Lanyard:Integration.Payment.TestGateway) < prototype(Neos.Fusion:Component) {
+
+    outcomeFallbacks = Neos.Fusion:DataStructure {
+        paid = 'Zahlung erfolgreich'
+        paidDelayed = 'Zahlung erfolgreich, Bestätigung verzögert'
+        failed = 'Zahlung fehlgeschlagen'
+        cancelled = 'Zahlung abbrechen'
+    }
+
+    renderer = ISP.Lanyard:Presentation.Payment.Page {
+        language = ${lanyardLanguage}
+        title = ISP.Lanyard:Translate {
+            source = 'Payment'
+            id = 'testGateway.title'
+            fallback = 'Test-Zahlung'
+        }
+
+        content = ISP.Lanyard:Presentation.Payment.TestGateway {
+            state = ${state}
+            reference = ${reference}
+            description = ${description}
+            amount = ${amount}
+            email = ${email}
+            decideUri = ${decideUri}
+            returnUri = ${returnUri}
+
+            notice = ISP.Lanyard:Translate {
+                source = 'Payment'
+                id = 'testGateway.notice'
+                fallback = 'Dies ist eine simulierte Bezahlseite für Tests. Es wird kein Geld bewegt.'
+            }
+            closedMessage = ISP.Lanyard:Translate {
+                source = 'Payment'
+                id = ${state == 'unknown' ? 'testGateway.unknown' : 'testGateway.closed'}
+                fallback = ${state == 'unknown' ? 'Dieser Zahlungsvorgang ist nicht bekannt.' : 'Dieser Zahlungsvorgang ist bereits abgeschlossen.'}
+            }
+            returnLabel = ISP.Lanyard:Translate {
+                source = 'Payment'
+                id = 'testGateway.return'
+                fallback = 'Zurück zum Shop'
+            }
+
+            outcomes = Neos.Fusion:Map {
+                items = ${outcomes}
+                itemName = 'outcome'
+                itemRenderer = Neos.Fusion:DataStructure {
+                    value = ${outcome}
+                    label = ISP.Lanyard:Translate {
+                        source = 'Payment'
+                        id = ${'testGateway.outcome.' + outcome}
+                        fallback = ${props.outcomeFallbacks[outcome]}
+                    }
+                }
+            }
+        }
+    }
+}

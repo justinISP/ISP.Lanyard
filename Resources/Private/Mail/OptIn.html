@@ -1,0 +1,22 @@
+{namespace f=Neos\FluidAdaptor\ViewHelpers}
+<f:section name="subject"><f:translate id="mail.optIn.subject" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: eventTitle}">Bitte bestätigen Sie Ihre Ticketanfrage – {eventTitle}</f:translate></f:section>
+
+<f:section name="body">
+<p><f:translate id="mail.salutation" package="ISP.Lanyard" source="Mail" locale="{language}" arguments="{0: fullName}">Hallo {fullName},</f:translate></p>
+<p><f:translate id="mail.optIn.intro" package="ISP.Lanyard" source="Mail" locale="{language}">vielen Dank für Ihre Ticketanfrage. Bitte bestätigen Sie Ihre E-Mail-Adresse über den folgenden Link. Erst danach wird Ihre Anfrage bearbeitet.</f:translate></p>
+<p><a href="{optInUri}">{optInUri}</a></p>
+<table>
+    <f:for each="{items}" as="item">
+        <tr>
+            <td>{item.quantity} ×</td>
+            <td>{item.title}<f:if condition="{item.days}"><br /><small>{item.days}</small></f:if></td>
+            <td>{item.subtotal}</td>
+        </tr>
+    </f:for>
+    <tr>
+        <td colspan="2"><f:translate id="mail.total" package="ISP.Lanyard" source="Mail" locale="{language}">Gesamt</f:translate></td>
+        <td>{totalAmount}</td>
+    </tr>
+</table>
+<p><f:translate id="mail.optIn.ignore" package="ISP.Lanyard" source="Mail" locale="{language}">Wenn Sie keine Tickets angefragt haben, können Sie diese E-Mail ignorieren.</f:translate></p>
+</f:section>

@@ -1,0 +1,43 @@
+#
+# Texte aus ISP.Lanyard/NodeTypes/Content/OrderForm.xlf
+#
+'ISP.Lanyard:Content.OrderForm':
+  superTypes:
+    'Neos.Neos:Content': true
+  ui:
+    label: 'ISP.Lanyard:NodeTypes.Content.OrderForm:ui.label'
+    icon: 'icon-ticket-alt'
+    group: plugins
+    inspector:
+      groups:
+        lanyard:
+          label: 'ISP.Lanyard:NodeTypes.Content.OrderForm:groups.lanyard'
+          icon: 'icon-ticket-alt'
+          position: 10
+  properties:
+    eventIdentifier:
+      type: string
+      ui:
+        label: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.eventIdentifier'
+        help:
+          message: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.eventIdentifier.help'
+        showInCreationDialog: true
+        reloadIfChanged: true
+        inspector:
+          group: lanyard
+          position: 10
+          editor: 'Neos.Neos/Inspector/Editors/SelectBoxEditor'
+          editorOptions:
+            dataSourceIdentifier: 'isp-lanyard-events'
+            allowEmpty: true
+            placeholder: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.eventIdentifier.placeholder'
+    privacyPage:
+      type: reference
+      ui:
+        label: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.privacyPage'
+        reloadIfChanged: true
+        inspector:
+          group: lanyard
+          position: 20
+          editorOptions:
+            nodeTypes: ['Neos.Neos:Document']

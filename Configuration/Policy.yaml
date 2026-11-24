@@ -1,0 +1,64 @@
+privilegeTargets:
+
+  # Achtung: Ein ModulePrivilege gibt ALLE Actions des Modul-Controllers
+  # (OrderController) frei. Dass TicketViewer trotzdem nichts ändert,
+  # stellt der Controller selbst sicher (assertGranted mit
+  # ISP.Lanyard:ManageOrders).
+  'Neos\Neos\Security\Authorization\Privilege\ModulePrivilege':
+    'ISP.Lanyard:BackendModule':
+      matcher: 'management/lanyard'
+
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+
+    # Lesender Zugriff: Listen, Detailansicht, Auslastung, Abholliste,
+    # Exporte.
+    'ISP.Lanyard:ViewOrders':
+      matcher: 'method(ISP\Lanyard\Controller\Module\Management\OrderController->(index|show|capacity|export|pickup|pickupExport)Action())'
+
+    # Statuswechsel, Bearbeiten, manuelle Buchung.
+    'ISP.Lanyard:ManageOrders':
+      matcher: 'method(ISP\Lanyard\Controller\Module\Management\OrderController->(approve|reject|cancel|markPaid|syncPayment|edit|update|new|create)Action())'
+
+    # Stammdaten: Events, Tage, Ticketarten, Kapazitäten. Alle Actions
+    # des SetupControllers, auch die lesenden – TicketViewer sieht die
+    # Stammdaten nicht.
+    'ISP.Lanyard:ManageSetup':
+      matcher: 'method(ISP\Lanyard\Controller\Module\Management\SetupController->.*Action())'
+
+    # Bestätigungslink aus der Opt-in-Mail. Muss für alle erreichbar
+    # sein – Neos sperrt sonst jede Controller-Action
+    # (Neos.Neos:AllControllerActions).
+    'ISP.Lanyard:OptIn':
+      matcher: 'method(ISP\Lanyard\Controller\OptInController->(show|confirm)Action())'
+
+    # Rückkehr vom Gateway und Webhook, ebenfalls für alle. Das
+    # Test-Gateway sperrt sich im Production-Kontext selbst.
+    'ISP.Lanyard:Payment':
+      matcher: 'method(ISP\Lanyard\Controller\PaymentController->(return|notify)Action()) || method(ISP\Lanyard\Controller\TestGatewayController->(show|decide)Action())'
+
+roles:
+
+  'Neos.Flow:Everybody':
+    privileges:
+      - privilegeTarget: 'ISP.Lanyard:OptIn'
+        permission: GRANT
+      - privilegeTarget: 'ISP.Lanyard:Payment'
+        permission: GRANT
+
+  # Sieht das Modul und die Bestellungen, ändert aber nichts.
+  'ISP.Lanyard:TicketViewer':
+    parentRoles: ['Neos.Neos:AbstractEditor']
+    privileges:
+      - privilegeTarget: 'ISP.Lanyard:BackendModule'
+        permission: GRANT
+      - privilegeTarget: 'ISP.Lanyard:ViewOrders'
+        permission: GRANT
+
+  # Bearbeitet Bestellungen und Stammdaten.
+  'ISP.Lanyard:TicketManager':
+    parentRoles: ['ISP.Lanyard:TicketViewer']
+    privileges:
+      - privilegeTarget: 'ISP.Lanyard:ManageOrders'
+        permission: GRANT
+      - privilegeTarget: 'ISP.Lanyard:ManageSetup'
+        permission: GRANT

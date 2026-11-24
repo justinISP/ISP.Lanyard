@@ -1,0 +1,77 @@
+##
+# Seitenhülle der Zahlungsseiten. Erbt von der Opt-in-Seite, damit
+# eine Gestaltung im Sitepackage für beide gilt; einzeln
+# überschreibbar.
+#
+prototype(ISP.Lanyard:Presentation.Payment.Page) < prototype(ISP.Lanyard:Presentation.OptIn.Page)
+
+##
+# Ergebnis der Zahlung, ungestaltet.
+#
+prototype(ISP.Lanyard:Presentation.Payment.Return) < prototype(Neos.Fusion:Component) {
+
+    # paid, pending, failed, invalid
+    state = ''
+    message = ''
+    reloadUri = null
+    reloadLabel = ''
+    backUri = null
+    backLabel = ''
+
+    renderer = afx`
+        <div class={'lanyardPaymentMessage lanyardPaymentMessage--' + props.state} role="status">
+            <p>{String.htmlSpecialChars(props.message)}</p>
+        </div>
+        <p @if.reload={props.reloadUri} class="lanyardPaymentActions">
+            <a href={props.reloadUri}>{String.htmlSpecialChars(props.reloadLabel)}</a>
+        </p>
+        <p @if.back={props.backUri} class="lanyardPaymentActions">
+            <a href={props.backUri}>{String.htmlSpecialChars(props.backLabel)}</a>
+        </p>
+    `
+}
+
+##
+# Simulierte Bezahlseite eines Anbieters. Ein Button je Ausgang.
+#
+prototype(ISP.Lanyard:Presentation.Payment.TestGateway) < prototype(Neos.Fusion:Component) {
+
+    # open, closed, unknown
+    state = ''
+    reference = ''
+    description = ''
+    amount = ''
+    email = ''
+    decideUri = ''
+    returnUri = ''
+    notice = ''
+    closedMessage = ''
+    returnLabel = ''
+
+    # [{value, label}]
+    outcomes = ${[]}
+
+    renderer = afx`
+        <p class="lanyardTestGatewayNotice"><strong>{String.htmlSpecialChars(props.notice)}</strong></p>
+
+        <dl @if.known={props.state != 'unknown'} class="lanyardTestGatewayFacts">
+            <dt>{String.htmlSpecialChars(props.description)}</dt>
+            <dd><strong>{String.htmlSpecialChars(props.amount)}</strong></dd>
+            <dd>{String.htmlSpecialChars(props.email)}</dd>
+        </dl>
+
+        <form @if.open={props.state == 'open'} method="post" action={props.decideUri} class="lanyardTestGatewayForm">
+            <input type="hidden" name="reference" value={props.reference} />
+            <Neos.Fusion:Loop items={props.outcomes} itemName="outcome">
+                <p>
+                    <button type="submit" name="outcome" value={outcome.value}>{String.htmlSpecialChars(outcome.label)}</button>
+                </p>
+            </Neos.Fusion:Loop>
+        </form>
+
+        <div @if.closed={props.state != 'open'}>
+            <p>{String.htmlSpecialChars(props.closedMessage)}</p>
+            <p @if.hasReturn={props.returnUri}><a href={props.returnUri}>{String.htmlSpecialChars(props.returnLabel)}</a></p>
+        </div>
+    `
+}

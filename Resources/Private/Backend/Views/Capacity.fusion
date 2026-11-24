@@ -1,0 +1,108 @@
+##
+# Auslastung je Tag. Kontext aus OrderController::capacityAction():
+# events (je Event: title, days), filter, eventOptions.
+#
+# GET-Filter: Die Action steht als verstecktes Feld im Formular, weil
+# der Browser den Query-String der Action-URL verwirft.
+#
+prototype(ISP.Lanyard:Backend.Integration.Capacity) < prototype(ISP.Lanyard:Backend.Integration.Layout) {
+    active = 'capacity'
+
+    content = ISP.Lanyard:Backend.Presentation.Capacity {
+        events = ${events}
+        filter = ${filter}
+        eventOptions = ${eventOptions}
+        filterUri = Neos.Fusion:UriBuilder {
+            action = 'capacity'
+        }
+    }
+}
+
+prototype(ISP.Lanyard:Backend.Presentation.Capacity) < prototype(Neos.Fusion:Component) {
+
+    events = ${[]}
+    filter = ${{}}
+    eventOptions = ${[]}
+    filterUri = ''
+
+    renderer = afx`
+        <header class="lanyardBackendHead">
+            <div>
+                <h2><ISP.Lanyard:Backend.T id="capacity.title" fallback="Auslastung" /></h2>
+                <p><ISP.Lanyard:Backend.T id="capacity.description" fallback="Belegte und freie Plätze je Veranstaltungstag" /></p>
+            </div>
+        </header>
+
+        <form method="get" action={props.filterUri} class="lanyardBackendFilter">
+            <input type="hidden" name="moduleArguments[@action]" value="capacity" />
+            <div>
+                <label for="lanyardFilterEvent"><ISP.Lanyard:Backend.T id="field.event" fallback="Veranstaltung" /></label>
+                <select id="lanyardFilterEvent" class="lanyardBackendInput" name="moduleArguments[event]">
+                    <option value=""><ISP.Lanyard:Backend.T id="filter.allEvents" fallback="Alle Veranstaltungen" /></option>
+                    <Neos.Fusion:Loop items={props.eventOptions} itemName="option">
+                        <option value={option.value} selected={option.value == props.filter.event}>{String.htmlSpecialChars(option.label)}</option>
+                    </Neos.Fusion:Loop>
+                </select>
+            </div>
+            <div class="lanyardBackendFilterSubmit">
+                <ISP.Lanyard:Backend.Button variant="accent" icon="filter">
+                    <ISP.Lanyard:Backend.T id="filter.submit" fallback="Filtern" />
+                </ISP.Lanyard:Backend.Button>
+            </div>
+        </form>
+
+        <div class="lanyardBackendEmpty lanyardBackendSection" @if.noEvents={!props.events}>
+            <ISP.Lanyard:Backend.T id="capacity.empty" fallback="Keine Veranstaltungstage vorhanden." />
+        </div>
+
+        <Neos.Fusion:Loop items={props.events} itemName="event">
+            <section class="lanyardBackendSection">
+                <header class="lanyardBackendHead">
+                    <h2>{String.htmlSpecialChars(event.title)}</h2>
+                </header>
+                <div class="lanyardBackendTableWrap">
+                    <table class="lanyardBackendTable">
+                        <thead>
+                            <tr>
+                                <th><ISP.Lanyard:Backend.T id="field.date" fallback="Datum" /></th>
+                                <th><ISP.Lanyard:Backend.T id="field.day" fallback="Tag" /></th>
+                                <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.capacity" fallback="Kapazität" /></th>
+                                <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.reserved" fallback="Belegt" /></th>
+                                <th class="lanyardBackendNum"><ISP.Lanyard:Backend.T id="field.available" fallback="Frei" /></th>
+                                <th><ISP.Lanyard:Backend.T id="field.utilisation" fallback="Auslastung" /></th>
+                                <th><ISP.Lanyard:Backend.T id="field.note" fallback="Hinweis" /></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <Neos.Fusion:Loop items={event.days} itemName="day">
+                                <tr class={day.closed ? 'lanyardBackendRow--muted' : ''}>
+                                    <td class="lanyardBackendNowrap">{day.date}</td>
+                                    <td>{day.label == '–' ? '–' : String.htmlSpecialChars(day.label)}</td>
+                                    <td class="lanyardBackendNum">{day.capacity}</td>
+                                    <td class="lanyardBackendNum">{day.reserved}</td>
+                                    <td class="lanyardBackendNum">{day.available}</td>
+                                    <td>
+                                        <div class="lanyardBackendBar">
+                                            <span class="lanyardBackendBarTrack">
+                                                <span
+                                                    class={'lanyardBackendBarFill' + (day.overbooked ? ' lanyardBackendBarFill--danger' : (day.critical ? ' lanyardBackendBarFill--warning' : ''))}
+                                                    style={'width: ' + Math.min(100, day.utilisation) + '%'}
+                                                ></span>
+                                            </span>
+                                            <span class="lanyardBackendNum">{day.utilisation} %</span>
+                                        </div>
+                                    </td>
+                                    <td class="lanyardBackendStatusCell">
+                                        <span @if.closed={day.closed} class="lanyardBackendBadge"><ISP.Lanyard:Backend.T id="capacity.closed" fallback="gesperrt" /></span>
+                                        <span @if.overbooked={!day.closed && day.overbooked} class="lanyardBackendBadge lanyardBackendBadge--danger"><ISP.Lanyard:Backend.T id="capacity.overbooked" fallback="überbucht" /></span>
+                                        <span @if.critical={!day.closed && !day.overbooked && day.critical} class="lanyardBackendBadge lanyardBackendBadge--warning"><ISP.Lanyard:Backend.T id="capacity.critical" fallback="wird knapp" /></span>
+                                    </td>
+                                </tr>
+                            </Neos.Fusion:Loop>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </Neos.Fusion:Loop>
+    `
+}

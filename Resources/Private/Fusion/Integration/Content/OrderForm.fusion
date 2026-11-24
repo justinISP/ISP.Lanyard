@@ -1,0 +1,261 @@
+prototype(ISP.Lanyard:Integration.OrderForm) < prototype(Neos.Fusion:Renderer) {
+    renderPath = '/lanyardOrderForm'
+}
+
+##
+# Das Formular ist ungecacht. Deshalb steht alles direkt am
+# RuntimeForm statt in einem umgebenden Component: dessen props wären
+# beim ungecachten Nachrendern nicht mehr da, @context dagegen wird
+# mit dem Formular neu ausgewertet.
+#
+prototype(ISP.Lanyard:Integration.OrderForm.Renderer) < prototype(Neos.Fusion.Form:Runtime.RuntimeForm) {
+
+    @context {
+        lanyardLanguage = ${documentNode.context.dimensions.language[0] || 'de'}
+        lanyardEvent = ${ISP.Lanyard.OrderForm.event(q(node).property('eventIdentifier'), documentNode.context.dimensions.language[0] || 'de')}
+        lanyardPaymentMethods = ${ISP.Lanyard.OrderForm.paymentMethods(documentNode.context.dimensions.language[0] || 'de')}
+    }
+
+    attributes.class = 'lanyardOrderForm'
+
+    data {
+        ordererType = 'private'
+        formToken = ${ISP.Lanyard.OrderForm.formToken()}
+        paymentMethod = ${lanyardPaymentMethods[0].value}
+        paymentMethod.@if.hasMethods = ${lanyardPaymentMethods}
+    }
+
+    process = ISP.Lanyard:Runtime.OrderProcess {
+        eventIdentifier = ${lanyardEvent.identifier}
+
+        # Nur Typumwandlung. Geprüft wird im OrderFormService, weil die
+        # Regeln feldübergreifend sind.
+        schema {
+            ordererType = ${Form.Schema.string()}
+            tickets = ${Form.Schema.array()}
+            organisation = ${Form.Schema.string()}
+            firstName = ${Form.Schema.string()}
+            lastName = ${Form.Schema.string()}
+            email = ${Form.Schema.string()}
+            phone = ${Form.Schema.string()}
+            message = ${Form.Schema.string()}
+            privacyConsent = ${Form.Schema.boolean()}
+            paymentMethod = ${Form.Schema.string()}
+            formToken = ${Form.Schema.string()}
+        }
+
+        content = ISP.Lanyard:Presentation.OrderForm {
+            ticketGroups = ${ISP.Lanyard.OrderForm.ticketGroups(lanyardEvent.identifier, lanyardLanguage)}
+            # Kommt das Formular mit Fehlern zurück, alle Tage aufklappen –
+            # sonst wären eingegebene Mengen versteckt.
+            expandDays = ${form.hasErrors()}
+            fieldRequirements = ${ISP.Lanyard.OrderForm.fieldRequirements()}
+            # Leer: keine Abfrage, Bestellung über Opt-in und Freigabe
+            paymentMethods = ${lanyardPaymentMethods}
+            honeypotFields = ${Configuration.setting('ISP.Lanyard.spamProtection.honeypotFields')}
+            privacyUri = Neos.Neos:NodeUri {
+                node = ${q(node).property('privacyPage')}
+                @if.hasPage = ${q(node).property('privacyPage')}
+            }
+            renderStyles = ${q(documentNode).find('[instanceof ISP.Lanyard:Content.OrderForm]').get(0) == node}
+            labels = ISP.Lanyard:Integration.OrderForm.Labels
+        }
+    }
+
+    action {
+        placeOrder {
+            type = 'ISP.Lanyard:PlaceOrder'
+            options {
+                eventIdentifier = ${lanyardEvent.identifier}
+                language = ${lanyardLanguage}
+                data = ${data}
+                formUri = Neos.Neos:NodeUri {
+                    node = ${documentNode}
+                    absolute = true
+                }
+                soldOutMessage = ISP.Lanyard:Presentation.OrderForm.Message {
+                    text = ISP.Lanyard:Translate {
+                        id = 'soldOut'
+                        fallback = 'Leider sind inzwischen nicht mehr genügend Plätze frei. Ihre Bestellung wurde nicht angelegt, es wurde nichts berechnet.'
+                    }
+                }
+                paymentErrorMessage = ISP.Lanyard:Presentation.OrderForm.Message {
+                    text = ISP.Lanyard:Translate {
+                        id = 'paymentError'
+                        fallback = 'Die Zahlung konnte nicht gestartet werden. Ihre Bestellung wurde nicht angelegt, es wurde nichts berechnet. Bitte versuchen Sie es später erneut.'
+                    }
+                }
+                message = ISP.Lanyard:Presentation.OrderForm.Message {
+                    text = ISP.Lanyard:Translate {
+                        id = 'success'
+                        fallback = 'Vielen Dank für Ihre Anfrage! Wir haben Ihnen eine E-Mail geschickt. Bitte bestätigen Sie darin Ihre Adresse – erst dann wird Ihre Anfrage bearbeitet.'
+                    }
+                }
+            }
+        }
+    }
+
+    # Ohne gültiges Event kein Formular. Im Backend erscheint stattdessen
+    # ein Hinweis, damit das Element nicht unsichtbar leer bleibt.
+    # Das AFX aus dem RuntimeForm erst leeren, sonst erbt der Case
+    # dessen Eel-Kinder.
+    form >
+    form = Neos.Fusion:Case {
+        hasEvent {
+            condition = ${lanyardEvent != null}
+            renderer = afx`
+                <Neos.Fusion.Form:Form form={form} attributes={attributes}>
+                    {content}
+                </Neos.Fusion.Form:Form>
+            `
+        }
+        backendNotice {
+            condition = ${node.context.inBackend}
+            renderer = ISP.Lanyard:Presentation.OrderForm.Message {
+                text = ISP.Lanyard:Translate {
+                    id = 'noEvent'
+                    fallback = 'Bitte im Inspector eine aktive Veranstaltung auswählen.'
+                }
+            }
+        }
+        default {
+            condition = true
+            renderer = ''
+        }
+    }
+}
+
+lanyardOrderForm = ISP.Lanyard:Integration.OrderForm.Renderer
+
+##
+# Alle sichtbaren Texte des Formulars, bereits übersetzt.
+#
+prototype(ISP.Lanyard:Integration.OrderForm.Labels) < prototype(Neos.Fusion:DataStructure) {
+    ordererType = ISP.Lanyard:Translate {
+        id = 'ordererType'
+        fallback = 'Ich bestelle als'
+    }
+    ordererTypePrivate = ISP.Lanyard:Translate {
+        id = 'ordererType.private'
+        fallback = 'Privatperson'
+    }
+    ordererTypeGroup = ISP.Lanyard:Translate {
+        id = 'ordererType.group'
+        fallback = 'Organisation oder Gruppe'
+    }
+    tickets = ISP.Lanyard:Translate {
+        id = 'tickets'
+        fallback = 'Tickets'
+    }
+    ticketsHint = ISP.Lanyard:Translate {
+        id = 'tickets.hint'
+        fallback = 'Höchstens {0} Tickets pro Bestellung, für Organisationen und Gruppen höchstens {1}.'
+        arguments = ${[ISP.Lanyard.OrderForm.maxTicketsPerOrder().private, ISP.Lanyard.OrderForm.maxTicketsPerOrder().group]}
+    }
+    ticket = ISP.Lanyard:Translate {
+        id = 'tickets.ticket'
+        fallback = 'Ticket'
+    }
+    price = ISP.Lanyard:Translate {
+        id = 'tickets.price'
+        fallback = 'Preis'
+    }
+    quantity = ISP.Lanyard:Translate {
+        id = 'tickets.quantity'
+        fallback = 'Anzahl'
+    }
+    soldOut = ISP.Lanyard:Translate {
+        id = 'tickets.soldOut'
+        fallback = 'ausverkauft'
+    }
+    packages = ISP.Lanyard:Translate {
+        id = 'tickets.packages'
+        fallback = 'Mehrtagestickets'
+    }
+    dayTickets = ISP.Lanyard:Translate {
+        id = 'tickets.days'
+        fallback = 'Tagestickets'
+    }
+    fromPrice = ISP.Lanyard:Translate {
+        id = 'tickets.fromPrice'
+        fallback = 'ab'
+    }
+    noTickets = ISP.Lanyard:Translate {
+        id = 'tickets.none'
+        fallback = 'Derzeit sind keine Tickets verfügbar.'
+    }
+    contact = ISP.Lanyard:Translate {
+        id = 'contact'
+        fallback = 'Kontaktdaten'
+    }
+    organisation = ISP.Lanyard:Translate {
+        id = 'contact.organisation'
+        fallback = 'Name der Organisation oder Gruppe'
+    }
+    firstName = ISP.Lanyard:Translate {
+        id = 'contact.firstName'
+        fallback = 'Vorname'
+    }
+    lastName = ISP.Lanyard:Translate {
+        id = 'contact.lastName'
+        fallback = 'Nachname'
+    }
+    email = ISP.Lanyard:Translate {
+        id = 'contact.email'
+        fallback = 'E-Mail'
+    }
+    phone = ISP.Lanyard:Translate {
+        id = 'contact.phone'
+        fallback = 'Telefon'
+    }
+    message = ISP.Lanyard:Translate {
+        id = 'contact.message'
+        fallback = 'Nachricht'
+    }
+    privacyConsent = ISP.Lanyard:Translate {
+        id = 'privacyConsent'
+        fallback = 'Ich habe die Datenschutzerklärung gelesen und bin mit der Verarbeitung meiner Daten zur Bearbeitung der Bestellung einverstanden.'
+    }
+    privacyLink = ISP.Lanyard:Translate {
+        id = 'privacyConsent.link'
+        fallback = 'Datenschutzerklärung lesen'
+    }
+    requiredAlways = ISP.Lanyard:Translate {
+        id = 'required.always'
+        fallback = '*'
+    }
+    requiredGroup = ISP.Lanyard:Translate {
+        id = 'required.group'
+        fallback = '(Pflicht für Organisationen und Gruppen)'
+    }
+    requiredPrivate = ISP.Lanyard:Translate {
+        id = 'required.private'
+        fallback = '(Pflicht für Privatpersonen)'
+    }
+    requiredHint = ISP.Lanyard:Translate {
+        id = 'required.hint'
+        fallback = 'Mit * gekennzeichnete Felder sind Pflichtfelder.'
+    }
+    honeypot = ISP.Lanyard:Translate {
+        id = 'honeypot'
+        fallback = 'Dieses Feld bitte leer lassen'
+    }
+    submit = ISP.Lanyard:Translate {
+        id = 'submit'
+        fallback = 'Tickets anfragen'
+    }
+    # Sobald Zahlungsarten abgefragt werden – § 312j BGB verlangt eine
+    # eindeutige Beschriftung.
+    submitPayment = ISP.Lanyard:Translate {
+        id = 'submit.payment'
+        fallback = 'Zahlungspflichtig bestellen'
+    }
+    paymentMethod = ISP.Lanyard:Translate {
+        id = 'paymentMethod'
+        fallback = 'Zahlungsart'
+    }
+    paymentMethodHint = ISP.Lanyard:Translate {
+        id = 'paymentMethod.hint'
+        fallback = 'Bei Online-Zahlung sind Ihre Tickets sofort gebucht. Bei den übrigen Zahlungsarten bestätigen Sie zuerst Ihre E-Mail-Adresse, danach prüfen wir Ihre Bestellung.'
+    }
+}

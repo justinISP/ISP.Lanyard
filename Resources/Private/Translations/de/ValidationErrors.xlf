@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Fehlermeldungen des Bestellformulars, nach Fehlercode. Überschreibbar im Sitepackage über eine Datei mit
+         product-name="ISP.Lanyard" original="ValidationErrors". -->
+    <file original="ValidationErrors" product-name="ISP.Lanyard" source-language="de" datatype="plaintext">
+        <body>
+            <trans-unit id="1761480001" xml:space="preserve">
+                <source>Dieses Feld muss leer bleiben.</source>
+            </trans-unit>
+            <trans-unit id="1761480101" xml:space="preserve">
+                <source>Bitte wählen Sie aus, als wer Sie bestellen.</source>
+            </trans-unit>
+            <trans-unit id="1761480102" xml:space="preserve">
+                <source>Das Formular konnte nicht verarbeitet werden. Bitte senden Sie es erneut ab.</source>
+            </trans-unit>
+            <trans-unit id="1761480103" xml:space="preserve">
+                <source>Dieses Feld ist ein Pflichtfeld.</source>
+            </trans-unit>
+            <trans-unit id="1761480104" xml:space="preserve">
+                <source>Bitte höchstens {0} Zeichen eingeben.</source>
+            </trans-unit>
+            <trans-unit id="1761480105" xml:space="preserve">
+                <source>Bitte geben Sie eine gültige E-Mail-Adresse ein.</source>
+            </trans-unit>
+            <trans-unit id="1761480106" xml:space="preserve">
+                <source>Bitte stimmen Sie der Datenschutzerklärung zu.</source>
+            </trans-unit>
+            <trans-unit id="1761480107" xml:space="preserve">
+                <source>Die Auswahl enthält ungültige Tickets.</source>
+            </trans-unit>
+            <trans-unit id="1761480108" xml:space="preserve">
+                <source>Von „{0}“ sind höchstens {1} Tickets pro Bestellung möglich.</source>
+            </trans-unit>
+            <trans-unit id="1761480109" xml:space="preserve">
+                <source>Bitte wählen Sie mindestens ein Ticket aus.</source>
+            </trans-unit>
+            <trans-unit id="1761480110" xml:space="preserve">
+                <source>Pro Bestellung sind höchstens {0} Tickets möglich.</source>
+            </trans-unit>
+            <trans-unit id="1761480111" xml:space="preserve">
+                <source>Für {0} sind nicht mehr genügend Plätze frei (noch {1} verfügbar).</source>
+            </trans-unit>
+            <trans-unit id="1761480112" xml:space="preserve">
+                <source>Bitte wählen Sie eine Zahlungsart.</source>
+            </trans-unit>
+            <trans-unit id="1761480201" xml:space="preserve">
+                <source>Für diese Veranstaltung sind derzeit keine Bestellungen möglich.</source>
+            </trans-unit>
+            <trans-unit id="1761480202" xml:space="preserve">
+                <source>Von Ihrem Anschluss sind in kurzer Zeit bereits mehrere Anfragen eingegangen. Bitte versuchen Sie es später erneut.</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

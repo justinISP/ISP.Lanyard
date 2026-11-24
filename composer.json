@@ -1,0 +1,30 @@
+{
+    "description": "Ticket ordering with capacity management and manual approval",
+    "type": "neos-plugin",
+    "name": "isp/lanyard",
+    "license": "MIT",
+    "require": {
+        "neos/flow": "^8.3",
+        "neos/neos": "^8.3",
+        "neos/fusion": "^8.3",
+        "neos/fusion-form": "^3.0",
+        "neos/fluid-adaptor": "^8.3",
+        "neos/symfonymailer": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ISP\\Lanyard\\": "Classes/"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "ISP.Lanyard",
+            "loading-order": {
+                "after": [
+                    "neos/neos",
+                    "neos/fusion-form"
+                ]
+            }
+        }
+    }
+}
