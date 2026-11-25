@@ -80,7 +80,8 @@ class PaymentService
     /**
      * Eingeschaltete Zahlungsarten in der Reihenfolge von "position".
      * Online-Zahlungsarten, deren Gateway nicht zur Verfügung steht
-     * (Test-Gateway im Production-Kontext), fallen weg.
+     * (nicht konfiguriert, Test-Gateway im Production-Kontext), fallen
+     * weg.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -219,7 +220,7 @@ class PaymentService
             throw $exception;
         }
 
-        $this->orderService->recordPaymentStarted($order, $session->reference);
+        $this->orderService->recordPaymentStarted($order, $session->reference, $session->returnSecret);
 
         return $session->redirectUri;
     }
@@ -250,7 +251,13 @@ class PaymentService
             $this->entityManager->lock($order, LockMode::PESSIMISTIC_WRITE);
             $this->entityManager->refresh($order);
 
-            $this->apply($order, $gateway, $gateway->fetchStatus((string)$order->getPaymentReference()), $actorType);
+            $result = $gateway->fetchStatus((string)$order->getPaymentReference(), $order->getPaymentTransactionId());
+
+            if ($result->transactionId !== null && $result->transactionId !== $order->getPaymentTransactionId()) {
+                $this->orderService->recordPaymentTransaction($order, $result->transactionId);
+            }
+
+            $this->apply($order, $gateway, $result, $actorType);
 
             $this->entityManager->flush();
             $connection->commit();
@@ -262,17 +269,41 @@ class PaymentService
 
     /**
      * Webhook: Das Gateway meldet eine Änderung. Der Inhalt der Meldung
-     * zählt nicht, nur die Kennung – den Stand holt synchronise().
+     * zählt nicht, nur wen sie betrifft – den Stand holt synchronise().
      *
-     * @return bool false, wenn die Meldung keiner Bestellung zuzuordnen ist
+     * @return int Anzahl der Bestellungen, die die Meldung betraf
+     * @throws InvalidNotificationException Signatur fehlt oder ist falsch
      * @throws PaymentException
      */
-    public function handleNotification(string $gatewayKey, ServerRequestInterface $request): bool
+    public function handleNotification(string $gatewayKey, ServerRequestInterface $request): int
     {
         $gateway = $this->getGateway($gatewayKey);
-        $reference = $gateway->referenceFromNotification($request);
+        $matched = 0;
 
-        return $reference !== null && $this->synchroniseByReference($reference, $gatewayKey);
+        foreach ($gateway->parseNotification($request) as $notification) {
+            $order = null;
+
+            if ($notification->reference !== null) {
+                $order = $this->orderRepository->findOneByPaymentReference($notification->reference);
+            }
+
+            if (!$order instanceof Order && $notification->bookingNumber !== null) {
+                $order = $this->orderRepository->findOneByBookingNumber($notification->bookingNumber);
+            }
+
+            if (!$order instanceof Order || $this->gatewayKeyFor($order) !== $gatewayKey) {
+                continue;
+            }
+
+            if ($notification->transactionId !== null && $order->getPaymentTransactionId() === null) {
+                $this->orderService->recordPaymentTransaction($order, $notification->transactionId);
+            }
+
+            $this->synchronise($order);
+            $matched++;
+        }
+
+        return $matched;
     }
 
     /**
@@ -308,7 +339,12 @@ class PaymentService
             return false;
         }
 
-        $gateway->refund((string)$order->getPaymentReference(), $order->getPaymentAmount() ?? $order->getTotalAmount());
+        $gateway->refund(
+            (string)$order->getPaymentReference(),
+            $order->getPaymentTransactionId(),
+            $order->getPaymentAmount() ?? $order->getTotalAmount(),
+            $this->currency
+        );
         $this->orderService->recordRefund($order);
 
         return true;
@@ -371,6 +407,17 @@ class PaymentService
     }
 
     /**
+     * Prüft, ob die Rückkehr zum Zahlungsvorgang der Bestellung gehört
+     * (PAYONE: RETURNMAC). Ohne Gateway nichts zu prüfen.
+     */
+    public function verifyReturn(Order $order, ServerRequestInterface $request): bool
+    {
+        $gateway = $this->gatewayFor($order);
+
+        return $gateway === null || $gateway->verifyReturn($request, $order->getPaymentReturnSecret());
+    }
+
+    /**
      * Prüft die signierte Formularadresse aus der Rückkehr-URL. Nur
      * selbst ausgestellte Adressen werden verlinkt.
      */
@@ -417,7 +464,7 @@ class PaymentService
             return false;
         }
 
-        return !$gateway instanceof TestGateway || $gateway->isAllowed();
+        return $gateway->isAvailable();
     }
 
     protected function gatewayKeyFor(Order $order): string
@@ -441,8 +488,21 @@ class PaymentService
     /**
      * @throws PaymentException
      */
-    protected function apply(Order $order, PaymentGatewayInterface $gateway, string $paymentStatus, string $actorType): void
+    protected function apply(Order $order, PaymentGatewayInterface $gateway, PaymentResult $result, string $actorType): void
     {
+        $paymentStatus = $result->status;
+
+        if ($paymentStatus === PaymentStatus::PAID && $result->amount !== null && $result->amount !== ($order->getPaymentAmount() ?? $order->getTotalAmount())) {
+            // Sollte über den Hosted Checkout nicht vorkommen – gebucht wird
+            // trotzdem, das Orga-Team muss es sich ansehen.
+            $this->logger->error(sprintf(
+                'ISP.Lanyard: Bestellung %s bezahlt mit %d Cent statt %d Cent.',
+                $order->getBookingNumber(),
+                $result->amount,
+                $order->getPaymentAmount() ?? $order->getTotalAmount()
+            ));
+        }
+
         if ($order->getStatus() === OrderStatus::PENDING_PAYMENT) {
             if ($paymentStatus === PaymentStatus::PAID) {
                 $this->orderService->markAsPaid($order, null, null, null, $actorType);
@@ -456,7 +516,12 @@ class PaymentService
         // Zahlung nach Verfall oder Storno: Die Plätze sind womöglich
         // vergeben, das Geld geht zurück.
         if ($paymentStatus === PaymentStatus::PAID && $order->isClosed()) {
-            $gateway->refund((string)$order->getPaymentReference(), $order->getPaymentAmount() ?? $order->getTotalAmount());
+            $gateway->refund(
+                (string)$order->getPaymentReference(),
+                $order->getPaymentTransactionId(),
+                $result->amount ?? $order->getPaymentAmount() ?? $order->getTotalAmount(),
+                $this->currency
+            );
             $this->orderService->recordRefund($order, 'Zahlung nach Verfall oder Storno eingegangen', $actorType);
             return;
         }

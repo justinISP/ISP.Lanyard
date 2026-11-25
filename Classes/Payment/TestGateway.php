@@ -49,6 +49,11 @@ class TestGateway implements PaymentGatewayInterface
             || ($this->settings['allowInProduction'] ?? false) === true;
     }
 
+    public function isAvailable(): bool
+    {
+        return $this->isAllowed();
+    }
+
     public function startPayment(PaymentRequest $request): PaymentSession
     {
         $this->assertAllowed();
@@ -73,7 +78,7 @@ class TestGateway implements PaymentGatewayInterface
         return new PaymentSession($reference, str_replace('{reference}', rawurlencode($reference), $checkoutUri));
     }
 
-    public function fetchStatus(string $reference): string
+    public function fetchStatus(string $reference, ?string $transactionId = null): PaymentResult
     {
         $this->assertAllowed();
 
@@ -89,24 +94,39 @@ class TestGateway implements PaymentGatewayInterface
             $this->store($reference, $session);
         }
 
-        return (string)$session['status'];
+        return new PaymentResult((string)$session['status'], $reference, (int)$session['amount']);
     }
 
-    public function referenceFromNotification(ServerRequestInterface $request): ?string
+    /**
+     * Die Rückkehr-URL trägt hier kein eigenes Geheimnis – das Token der
+     * Bestellung genügt.
+     */
+    public function verifyReturn(ServerRequestInterface $request, ?string $returnSecret): bool
     {
+        return true;
+    }
+
+    /**
+     * Ohne Signatur: Das Test-Gateway meldet sich nicht per HTTP, sondern
+     * über TestGatewayController direkt.
+     */
+    public function parseNotification(ServerRequestInterface $request): array
+    {
+        $this->assertAllowed();
+
         $body = (array)$request->getParsedBody();
         $reference = $body['reference'] ?? $request->getQueryParams()['reference'] ?? null;
 
-        return is_string($reference) && $reference !== '' ? $reference : null;
+        return is_string($reference) && $reference !== '' ? [new PaymentNotification($reference)] : [];
     }
 
-    public function refund(string $reference, int $amount): void
+    public function refund(string $reference, ?string $transactionId, int $amount, string $currency): void
     {
         $this->assertAllowed();
 
         $session = $this->getSession($reference);
 
-        if ($session === null || $this->fetchStatus($reference) !== PaymentStatus::PAID) {
+        if ($session === null || $this->fetchStatus($reference)->status !== PaymentStatus::PAID) {
             throw new PaymentException(sprintf('Test payment "%s" is not paid, nothing to refund.', $reference), 1763640102);
         }
 

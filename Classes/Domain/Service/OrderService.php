@@ -113,16 +113,30 @@ class OrderService
     }
 
     /**
-     * Merkt sich die Kennung des Zahlungsvorgangs beim Gateway. Der
-     * Status ändert sich nicht.
+     * Merkt sich die Kennung des Zahlungsvorgangs beim Gateway und das
+     * Geheimnis für die Rückkehr. Der Status ändert sich nicht.
      */
-    public function recordPaymentStarted(Order $order, string $reference): void
+    public function recordPaymentStarted(Order $order, string $reference, ?string $returnSecret = null): void
     {
-        $this->transactional(function () use ($order, $reference): void {
+        $this->transactional(function () use ($order, $reference, $returnSecret): void {
             $order->setPaymentReference($reference);
+            $order->setPaymentReturnSecret($returnSecret);
             $order->touch();
             $this->orderRepository->update($order);
             $this->orderHistoryService->record($order, OrderLogEntry::ACTION_PAYMENT_STARTED, $reference);
+        });
+    }
+
+    /**
+     * Merkt sich die Kennung der Zahlung beim Gateway, sobald es eine
+     * gibt. Der Status ändert sich nicht.
+     */
+    public function recordPaymentTransaction(Order $order, string $transactionId): void
+    {
+        $this->transactional(function () use ($order, $transactionId): void {
+            $order->setPaymentTransactionId($transactionId);
+            $order->touch();
+            $this->orderRepository->update($order);
         });
     }
 

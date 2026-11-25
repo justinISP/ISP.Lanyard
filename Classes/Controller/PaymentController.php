@@ -5,6 +5,7 @@ namespace ISP\Lanyard\Controller;
 
 use ISP\Lanyard\Domain\Model\Order;
 use ISP\Lanyard\Domain\Model\OrderStatus;
+use ISP\Lanyard\Payment\InvalidNotificationException;
 use ISP\Lanyard\Payment\PaymentException;
 use ISP\Lanyard\Payment\PaymentService;
 use Neos\Flow\Annotations as Flow;
@@ -52,6 +53,13 @@ class PaymentController extends ActionController
     {
         $order = $this->paymentService->findOrderByToken($token);
 
+        // Gehört die Rückkehr zu diesem Zahlungsvorgang? PAYONE hängt dafür
+        // RETURNMAC an die Rückkehr-URL.
+        if ($order !== null && !$this->paymentService->verifyReturn($order, $this->request->getHttpRequest())) {
+            $this->logger->warning(sprintf('ISP.Lanyard: Rückkehr zu Bestellung %s ohne passendes Rückkehr-Geheimnis.', $order->getBookingNumber()));
+            $order = null;
+        }
+
         if ($order !== null && $order->getStatus() === OrderStatus::PENDING_PAYMENT) {
             try {
                 $this->paymentService->synchronise($order);
@@ -76,8 +84,9 @@ class PaymentController extends ActionController
     }
 
     /**
-     * Webhook. Antwortet mit 500, wenn das Gateway nicht erreichbar war –
-     * Anbieter wiederholen die Meldung dann.
+     * Webhook. Antwortet mit 401 auf eine falsche Signatur und mit 500,
+     * wenn das Gateway nicht erreichbar war – Anbieter wiederholen die
+     * Meldung dann.
      */
     #[Flow\SkipCsrfProtection]
     public function notifyAction(string $gateway): string
@@ -85,7 +94,11 @@ class PaymentController extends ActionController
         $this->response->setContentType('text/plain');
 
         try {
-            $known = $this->paymentService->handleNotification($gateway, $this->request->getHttpRequest());
+            $known = $this->paymentService->handleNotification($gateway, $this->request->getHttpRequest()) > 0;
+        } catch (InvalidNotificationException $exception) {
+            $this->logger->warning(sprintf('ISP.Lanyard: Webhook für "%s" abgewiesen: %s', $gateway, $exception->getMessage()));
+            $this->response->setStatusCode(401);
+            return 'invalid';
         } catch (PaymentException $exception) {
             $this->logger->error(sprintf('ISP.Lanyard: Webhook von "%s" nicht verarbeitet: %s', $gateway, $exception->getMessage()));
             $this->response->setStatusCode(500);

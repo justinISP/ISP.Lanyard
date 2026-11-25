@@ -100,6 +100,24 @@ ISP:
           confirmationDelay: 30
           allowInProduction: false
 
+        # PAYONE (Worldline-Plattform), Hosted Checkout. Zugangsdaten
+        # setzt das Sitepackage; ohne sie ist das Gateway nicht verfügbar.
+        # apiEndpoint ohne Pfad, Test: https://payment.preprod.payone.com,
+        # live: https://payment.payone.com
+        payone:
+          className: 'ISP\Lanyard\Payment\PayoneGateway'
+          apiEndpoint: ''
+          merchantId: ''
+          apiKeyId: ''
+          apiSecret: ''
+          webhookKeyId: ''
+          webhookSecret: ''
+          # Erscheint in den Protokollen des Anbieters
+          integrator: 'ISP.Lanyard'
+          # Sekunden
+          connectTimeout: 5
+          readTimeout: 30
+
       # Fusion für Rückkehrseite und Test-Gateway, gerendert wird der
       # Pfad 'lanyardPayment'. Wie optIn.fusionPathPatterns.
       fusionPathPatterns:

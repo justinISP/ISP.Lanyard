@@ -226,6 +226,26 @@ class Order
     protected ?string $paymentToken = null;
 
     /**
+     * Kennung der Zahlung beim Gateway (PAYONE: payment.id), sobald es
+     * eine gibt. Grundlage für Erstattungen.
+     *
+     * @var string|null
+     *
+     * @ORM\Column(nullable=true)
+     */
+    protected ?string $paymentTransactionId = null;
+
+    /**
+     * Geheimnis, das das Gateway bei der Rückkehr mitschickt (PAYONE:
+     * RETURNMAC).
+     *
+     * @var string|null
+     *
+     * @ORM\Column(nullable=true)
+     */
+    protected ?string $paymentReturnSecret = null;
+
+    /**
      * Gehasht, nie im Klartext. Dient dem Rate-Limit und der
      * Missbrauchsanalyse.
      *
@@ -525,6 +545,26 @@ class Order
     public function setPaymentToken(?string $paymentToken): void
     {
         $this->paymentToken = $paymentToken;
+    }
+
+    public function getPaymentTransactionId(): ?string
+    {
+        return $this->paymentTransactionId;
+    }
+
+    public function setPaymentTransactionId(?string $paymentTransactionId): void
+    {
+        $this->paymentTransactionId = $paymentTransactionId;
+    }
+
+    public function getPaymentReturnSecret(): ?string
+    {
+        return $this->paymentReturnSecret;
+    }
+
+    public function setPaymentReturnSecret(?string $paymentReturnSecret): void
+    {
+        $this->paymentReturnSecret = $paymentReturnSecret;
     }
 
     /**
