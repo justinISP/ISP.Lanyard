@@ -215,7 +215,8 @@ class PaymentService
                 $this->absoluteUri(str_replace('{gateway}', rawurlencode($this->gatewayKeyFor($order)), (string)($this->settings['notifyUri'] ?? '')))
             ));
         } catch (PaymentException $exception) {
-            $this->logger->error(sprintf('ISP.Lanyard: Zahlung für Bestellung %s konnte nicht gestartet werden: %s', $order->getBookingNumber(), $exception->getMessage()));
+            // Rückkehr-Adresse mitloggen: Anbieter lehnen sie z. B. ohne HTTPS ab
+            $this->logger->error(sprintf('ISP.Lanyard: Zahlung für Bestellung %s konnte nicht gestartet werden (Rückkehr: %s): %s', $order->getBookingNumber(), $returnUri, $exception->getMessage()));
             $this->orderService->failPayment($order, PaymentStatus::FAILED, OrderLogEntry::ACTOR_SYSTEM);
             throw $exception;
         }
