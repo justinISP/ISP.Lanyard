@@ -246,6 +246,17 @@ class Order
     protected ?string $paymentReturnSecret = null;
 
     /**
+     * Seite des Bestellformulars, für "erneut bestellen" nach einer
+     * abgebrochenen Zahlung. Steht an der Bestellung statt in der
+     * Rückkehr-URL, weil Anbieter deren Länge begrenzen (PAYONE: 200).
+     *
+     * @var string|null
+     *
+     * @ORM\Column(length=1000, nullable=true)
+     */
+    protected ?string $formUri = null;
+
+    /**
      * Gehasht, nie im Klartext. Dient dem Rate-Limit und der
      * Missbrauchsanalyse.
      *
@@ -565,6 +576,16 @@ class Order
     public function setPaymentReturnSecret(?string $paymentReturnSecret): void
     {
         $this->paymentReturnSecret = $paymentReturnSecret;
+    }
+
+    public function getFormUri(): ?string
+    {
+        return $this->formUri;
+    }
+
+    public function setFormUri(?string $formUri): void
+    {
+        $this->formUri = $formUri;
     }
 
     /**

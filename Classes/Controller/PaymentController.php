@@ -49,7 +49,7 @@ class PaymentController extends ActionController
         }
     }
 
-    public function returnAction(string $token = '', string $back = ''): void
+    public function returnAction(string $token = ''): void
     {
         $order = $this->paymentService->findOrderByToken($token);
 
@@ -78,7 +78,7 @@ class PaymentController extends ActionController
             'state' => $state,
             'bookingNumber' => $order !== null ? (string)$order->getBookingNumber() : '',
             'email' => $order !== null ? $order->getEmail() : '',
-            'backUri' => $back !== '' ? $this->paymentService->verifyBackUri($back) : null,
+            'backUri' => $order !== null && preg_match('#^https?://#i', (string)$order->getFormUri()) === 1 ? $order->getFormUri() : null,
             'reloadUri' => $state === self::STATE_PENDING ? (string)$this->request->getHttpRequest()->getUri() : null,
         ]);
     }

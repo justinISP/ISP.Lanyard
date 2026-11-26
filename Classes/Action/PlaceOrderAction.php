@@ -74,8 +74,11 @@ class PlaceOrderAction extends AbstractAction
                 return $response;
             }
 
+            $formUri = (string)($this->options['formUri'] ?? '');
+            $order->setFormUri($formUri !== '' ? $formUri : null);
+
             $this->orderService->placeForPayment($order, (string)$order->getPaymentMethod(), $this->paymentService->generateToken());
-            $redirectUri = $this->paymentService->start($order, (string)($this->options['formUri'] ?? ''));
+            $redirectUri = $this->paymentService->start($order);
             $response->setRedirectUri($this->uriFactory->createUri($redirectUri), 303);
         } catch (CapacityExceededException) {
             // Zwischen Prüfung und Buchung vergeben – die Bestellung ist

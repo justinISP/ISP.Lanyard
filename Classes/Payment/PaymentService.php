@@ -18,8 +18,6 @@ use Neos\Flow\Http\BaseUriProvider;
 use Neos\Flow\I18n\Locale;
 use Neos\Flow\I18n\Translator;
 use Neos\Flow\ObjectManagement\ObjectManagerInterface;
-use Neos\Flow\Security\Cryptography\HashService;
-use Neos\Flow\Security\Exception as SecurityException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 
@@ -54,9 +52,6 @@ class PaymentService
 
     #[Flow\Inject]
     protected ObjectManagerInterface $objectManager;
-
-    #[Flow\Inject]
-    protected HashService $hashService;
 
     #[Flow\Inject]
     protected BaseUriProvider $baseUriProvider;
@@ -184,12 +179,11 @@ class PaymentService
      * Scheitert das Gateway, verfällt die Bestellung sofort und gibt
      * die Plätze frei – der Besteller sieht eine Fehlermeldung.
      *
-     * @param string $backUri Seite des Formulars, für "erneut bestellen"
      * @throws PaymentException
      */
-    public function start(Order $order, string $backUri): string
+    public function start(Order $order): string
     {
-        $returnUri = $this->buildReturnUri($order, $backUri);
+        $returnUri = $this->buildReturnUri($order);
 
         // Nichts zu bezahlen, z. B. nur Freikarten: kein Umweg übers Gateway
         if ($order->getTotalAmount() === 0) {
@@ -418,21 +412,6 @@ class PaymentService
         return $gateway === null || $gateway->verifyReturn($request, $order->getPaymentReturnSecret());
     }
 
-    /**
-     * Prüft die signierte Formularadresse aus der Rückkehr-URL. Nur
-     * selbst ausgestellte Adressen werden verlinkt.
-     */
-    public function verifyBackUri(string $signedUri): ?string
-    {
-        try {
-            $uri = $this->hashService->validateAndStripHmac($signedUri);
-        } catch (SecurityException) {
-            return null;
-        }
-
-        return preg_match('#^(https?://|/)#i', $uri) === 1 ? $uri : null;
-    }
-
     #
     # Gateways
     #
@@ -532,13 +511,9 @@ class PaymentService
         }
     }
 
-    protected function buildReturnUri(Order $order, string $backUri): string
+    protected function buildReturnUri(Order $order): string
     {
         $uri = str_replace('{token}', rawurlencode((string)$order->getPaymentToken()), (string)($this->settings['returnUri'] ?? ''));
-
-        if ($backUri !== '') {
-            $uri .= (str_contains($uri, '?') ? '&' : '?') . 'back=' . rawurlencode($this->hashService->appendHmac($backUri));
-        }
 
         return $this->absoluteUri($uri);
     }

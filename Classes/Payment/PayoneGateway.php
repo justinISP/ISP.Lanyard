@@ -48,6 +48,8 @@ class PayoneGateway implements PaymentGatewayInterface
 {
     protected const REQUIRED_SETTINGS = ['apiEndpoint', 'merchantId', 'apiKeyId', 'apiSecret', 'webhookKeyId', 'webhookSecret'];
 
+    protected const MAX_RETURN_URL_LENGTH = 200;
+
     #[Flow\InjectConfiguration(path: 'payment.gateways.payone', package: 'ISP.Lanyard')]
     protected array $settings = [];
 
@@ -71,6 +73,12 @@ class PayoneGateway implements PaymentGatewayInterface
 
     public function startPayment(PaymentRequest $request): PaymentSession
     {
+        // PAYONE lehnt längere Rückkehr-URLs ab, meldet aber nur
+        // "50001111 hostedCheckoutSpecificInput.returnUrl"
+        if (strlen($request->returnUri) > self::MAX_RETURN_URL_LENGTH) {
+            throw new PaymentException(sprintf('Return URL longer than %d characters: %s', self::MAX_RETURN_URL_LENGTH, $request->returnUri), 1764000108);
+        }
+
         $hostedCheckoutInput = (new HostedCheckoutSpecificInput())
             ->withReturnUrl($request->returnUri)
             ->withLocale($this->locale($request->language))
