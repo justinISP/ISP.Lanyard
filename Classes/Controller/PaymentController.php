@@ -18,7 +18,9 @@ use Neos\Fusion\View\FusionView;
  *
  * Die Rückkehrseite fragt den Stand selbst beim Gateway ab, statt der
  * Rückkehr zu glauben: Ein Besteller könnte die URL sonst ohne Zahlung
- * aufrufen. Gerendert über Fusion, Pfad 'lanyardPayment', Dateien aus
+ * aufrufen. Danach geht es auf die Seiten aus payment.resultUris oder,
+ * wenn keine eingetragen sind, auf die eigene Rückkehrseite: gerendert
+ * über Fusion, Pfad 'lanyardPayment', Dateien aus
  * ISP.Lanyard.payment.fusionPathPatterns.
  */
 class PaymentController extends ActionController
@@ -35,6 +37,9 @@ class PaymentController extends ActionController
 
     #[Flow\Inject]
     protected PaymentService $paymentService;
+
+    #[Flow\InjectConfiguration(path: 'payment.resultUris', package: 'ISP.Lanyard')]
+    protected array $resultUris = [];
 
     // $logger stammt aus dem ActionController.
 
@@ -72,6 +77,13 @@ class PaymentController extends ActionController
 
         $state = $this->determineState($order);
 
+        // Seiten der Website statt der eigenen Rückkehrseite
+        $resultUri = $this->resultUri($state, $order !== null ? $order->getLanguage() : 'de');
+
+        if ($resultUri !== '') {
+            $this->redirectToUri($resultUri, 0, 303);
+        }
+
         $this->view->assignMultiple([
             'page' => 'return',
             'lanyardLanguage' => $order !== null ? $order->getLanguage() : 'de',
@@ -106,6 +118,13 @@ class PaymentController extends ActionController
         }
 
         return $known ? 'ok' : 'ignored';
+    }
+
+    protected function resultUri(string $state, string $language): string
+    {
+        $uris = (array)($this->resultUris[in_array($state, [self::STATE_PAID, self::STATE_PENDING], true) ? 'success' : 'failure'] ?? []);
+
+        return trim((string)($uris[$language] ?? $uris['de'] ?? ''));
     }
 
     protected function determineState(?Order $order): string
