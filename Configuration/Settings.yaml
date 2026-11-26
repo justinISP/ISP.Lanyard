@@ -137,6 +137,32 @@ ISP:
         maxAttempts: 5
         interval: 3600
 
+    # QR-Tickets, eines je Person. Ausgestellt, sobald eine Bestellung
+    # bezahlt ist (jede Zahlungsart), ungültig beim Storno.
+    tickets:
+      code:
+        # Inhalt des QR-Codes. Zufällig und nicht erratbar, wie die
+        # Buchungsnummer, aber länger: Der Code allein gewährt Einlass.
+        length: 20
+        alphabet: '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
+      qr:
+        # Wird dem Code im QR vorangestellt, z. B. 'KWM:'
+        prefix: ''
+      pdf:
+        # Fluid-Template, eine Seite je Ticket. Das Sitepackage ersetzt es.
+        template: 'resource://ISP.Lanyard/Private/Tickets/Tickets.html'
+        # Bei mehreren Dateien mit laufender Nummer: Tickets-…-2.pdf
+        filename: 'Tickets-{bookingNumber}.pdf'
+        # Große Bestellungen auf mehrere Dateien verteilen – dompdf
+        # braucht für große Dokumente überproportional Zeit und Speicher
+        ticketsPerFile: 25
+        paper: 'A4'
+        orientation: 'portrait'
+        defaultFont: 'DejaVu Sans'
+        # Mails (Schlüssel aus mail.templates), an die das PDF angehängt
+        # wird
+        attachTo: ['paid']
+
     mail:
       senderAddress: ''
       senderName: ''

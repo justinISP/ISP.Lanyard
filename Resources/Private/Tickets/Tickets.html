@@ -1,0 +1,68 @@
+{namespace f=Neos\FluidAdaptor\ViewHelpers}
+<f:comment>
+    Ticket-PDF, ungestaltet – eine Seite je Ticket. Das Sitepackage
+    ersetzt dieses Template über ISP.Lanyard.tickets.pdf.template.
+
+    Gerendert mit dompdf: kein Flexbox, kein Grid, nichts aus dem Netz.
+    Bilder und Schriften als data-URI ({namespace lanyard=ISP\Lanyard\ViewHelpers},
+    lanyard:dataUri).
+
+    Variablen: language, bookingNumber, eventTitle, holder, fullName,
+    paymentMethod, ticketCount, order und tickets – je Ticket number,
+    count, code, qrCode (data-URI), title, days (Liste), price.
+</f:comment>
+<!DOCTYPE html>
+<html lang="{language}">
+<head>
+    <meta charset="utf-8">
+    <title>{eventTitle} – {bookingNumber}</title>
+    <style>
+        @page { margin: 20mm; }
+        body { font-family: "DejaVu Sans", sans-serif; font-size: 11pt; color: #000; }
+        .ticket { page-break-after: always; }
+        .ticket:last-child { page-break-after: auto; }
+        h1 { margin: 0 0 4mm; font-size: 20pt; }
+        h2 { margin: 0 0 8mm; font-size: 14pt; font-weight: normal; }
+        .qr { margin: 0 0 4mm; text-align: center; }
+        .qr img { width: 70mm; height: 70mm; }
+        .code { margin: 0 0 10mm; text-align: center; font-family: "DejaVu Sans Mono", monospace; font-size: 12pt; letter-spacing: 1pt; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 2mm 0; border-top: 0.3mm solid #999; text-align: left; vertical-align: top; }
+        th { width: 45mm; font-weight: normal; color: #555; }
+        .note { margin-top: 10mm; font-size: 9pt; color: #555; }
+    </style>
+</head>
+<body>
+<f:for each="{tickets}" as="ticket">
+    <div class="ticket">
+        <h1>{eventTitle}</h1>
+        <h2>{ticket.title}</h2>
+        <div class="qr"><img src="{ticket.qrCode}" alt="{ticket.code}"></div>
+        <div class="code">{ticket.code}</div>
+        <table>
+            <tr>
+                <th><f:translate id="validOn" package="ISP.Lanyard" source="Tickets" locale="{language}">Gültig am</f:translate></th>
+                <td><f:for each="{ticket.days}" as="day" iteration="iteration">{day}<f:if condition="{iteration.isLast}"><f:else><br></f:else></f:if></f:for></td>
+            </tr>
+            <tr>
+                <th><f:translate id="holder" package="ISP.Lanyard" source="Tickets" locale="{language}">Besteller</f:translate></th>
+                <td>{holder}</td>
+            </tr>
+            <tr>
+                <th><f:translate id="bookingNumber" package="ISP.Lanyard" source="Tickets" locale="{language}">Buchungsnummer</f:translate></th>
+                <td>{bookingNumber}</td>
+            </tr>
+            <tr>
+                <th><f:translate id="price" package="ISP.Lanyard" source="Tickets" locale="{language}">Preis</f:translate></th>
+                <td>{ticket.price}</td>
+            </tr>
+            <tr>
+                <th><f:translate id="ticket" package="ISP.Lanyard" source="Tickets" locale="{language}">Ticket</f:translate></th>
+                <td><f:translate id="ticketOf" package="ISP.Lanyard" source="Tickets" locale="{language}" arguments="{0: ticket.number, 1: ticket.count}">{ticket.number} von {ticket.count}</f:translate></td>
+            </tr>
+        </table>
+        <p class="note"><f:translate id="note" package="ISP.Lanyard" source="Tickets" locale="{language}">Jeder QR-Code gilt für eine Person und wird beim Einlass gescannt. Bitte geben Sie ihn nicht weiter.</f:translate></p>
+    </div>
+</f:for>
+</body>
+</html>

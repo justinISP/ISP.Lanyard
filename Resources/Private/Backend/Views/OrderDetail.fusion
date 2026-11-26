@@ -34,6 +34,24 @@ prototype(ISP.Lanyard:Backend.Integration.OrderDetail) < prototype(ISP.Lanyard:B
             action = 'syncPayment'
             arguments.order = ${order.identifier}
         }
+        resendTicketsUri = Neos.Fusion:UriBuilder {
+            action = 'resendTickets'
+            arguments.order = ${order.identifier}
+        }
+        ticketDownloads = Neos.Fusion:Map {
+            items = ${order.ticketFiles}
+            itemName = 'part'
+            itemRenderer = Neos.Fusion:DataStructure {
+                part = ${part}
+                # Ohne eigenes Format packt Neos die Antwort in die Modul-Hülle
+                uri = Neos.Fusion:UriBuilder {
+                    action = 'downloadTickets'
+                    format = 'pdf'
+                    arguments.order = ${order.identifier}
+                    arguments.part = ${part}
+                }
+            }
+        }
         paymentMethodOptions = ${paymentMethodOptions}
         editUri = Neos.Fusion:UriBuilder {
             action = 'edit'
@@ -53,11 +71,14 @@ prototype(ISP.Lanyard:Backend.Presentation.OrderDetail) < prototype(Neos.Fusion:
     cancelUri = ''
     markPaidUri = ''
     syncPaymentUri = ''
+    resendTicketsUri = ''
+    # [{part, uri}] – je PDF-Datei ein Download
+    ticketDownloads = ${[]}
     editUri = ''
     # [{value, label}] – leer: Freitextfeld
     paymentMethodOptions = ${[]}
 
-    hasActions = ${this.order.can.approve || this.order.can.reject || this.order.can.markPaid || this.order.can.syncPayment || this.order.can.cancel}
+    hasActions = ${this.order.can.approve || this.order.can.reject || this.order.can.markPaid || this.order.can.syncPayment || this.order.can.resendTickets || this.order.can.cancel}
 
     renderer = afx`
         <a href={props.backUri} class="lanyardBackendBack">
@@ -150,6 +171,48 @@ prototype(ISP.Lanyard:Backend.Presentation.OrderDetail) < prototype(Neos.Fusion:
                                     <td class="lanyardBackendNum">{props.order.total}</td>
                                 </tr>
                             </tfoot>
+                        </table>
+                    </div>
+                </section>
+
+                <section @if.hasTickets={props.order.tickets} class="lanyardBackendSection">
+                    <header class="lanyardBackendHead">
+                        <div>
+                            <h2><ISP.Lanyard:Backend.T id="detail.qrTickets" fallback="QR-Tickets" /></h2>
+                            <p><ISP.Lanyard:Backend.T id="detail.qrTickets.hint" fallback="Ein Ticket je Person, ausgestellt mit der Zahlung. Beim Storno werden sie ungültig." /></p>
+                        </div>
+                        <div @if.download={props.order.hasValidTickets} class="lanyardBackendHeadActions">
+                            <Neos.Fusion:Loop items={props.ticketDownloads} itemName="download">
+                                <ISP.Lanyard:Backend.Button href={download.uri} icon="download">
+                                    <ISP.Lanyard:Backend.T id="action.downloadTickets" fallback="PDF" />
+                                    {Array.length(props.ticketDownloads) > 1 ? ' ' + download.part : ''}
+                                </ISP.Lanyard:Backend.Button>
+                            </Neos.Fusion:Loop>
+                        </div>
+                    </header>
+                    <div class="lanyardBackendTableWrap">
+                        <table class="lanyardBackendTable">
+                            <thead>
+                                <tr>
+                                    <th class="lanyardBackendNum">#</th>
+                                    <th><ISP.Lanyard:Backend.T id="field.ticketCode" fallback="Code" /></th>
+                                    <th><ISP.Lanyard:Backend.T id="field.ticket" fallback="Ticket" /></th>
+                                    <th><ISP.Lanyard:Backend.T id="field.status" fallback="Status" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Neos.Fusion:Loop items={props.order.tickets} itemName="ticket">
+                                    <tr class={ticket.valid ? '' : 'lanyardBackendRow--muted'}>
+                                        <td class="lanyardBackendNum">{ticket.number}</td>
+                                        <td><span class="lanyardBackendCode">{ticket.code}</span></td>
+                                        <td>{String.htmlSpecialChars(ticket.title)}</td>
+                                        <td>
+                                            <ISP.Lanyard:Backend.T @if.valid={ticket.valid} id="ticket.status.valid" fallback="gültig" />
+                                            <ISP.Lanyard:Backend.T @if.cancelled={!ticket.valid} id="ticket.status.cancelled" fallback="storniert" />
+                                        </td>
+                                    </tr>
+                                </Neos.Fusion:Loop>
+                            </tbody>
                         </table>
                     </div>
                 </section>
@@ -252,6 +315,15 @@ prototype(ISP.Lanyard:Backend.Presentation.OrderDetail) < prototype(Neos.Fusion:
                         <span class="lanyardBackendFieldHelp"><ISP.Lanyard:Backend.T id="action.syncPayment.hint" fallback="Die Online-Zahlung ist noch offen. Fragt den Stand beim Zahlungsanbieter ab, falls dessen Meldung ausgeblieben ist." /></span>
                         <ISP.Lanyard:Backend.Button variant="accent" icon="refresh">
                             <ISP.Lanyard:Backend.T id="action.syncPayment" fallback="Zahlungsstand abfragen" />
+                        </ISP.Lanyard:Backend.Button>
+                    </form>
+
+                    <form @if.can={props.order.can.resendTickets} method="post" action={props.resendTicketsUri} class="lanyardBackendPanel lanyardBackendStack">
+                        <ISP.Lanyard:Backend.CsrfField />
+                        <h3 class="lanyardBackendPanelTitle"><ISP.Lanyard:Backend.T id="action.resendTickets" fallback="Tickets erneut senden" /></h3>
+                        <span class="lanyardBackendFieldHelp"><ISP.Lanyard:Backend.T id="action.resendTickets.hint" fallback="Schickt die Mail „Zahlung eingegangen“ mit den Tickets noch einmal an den Besteller." /></span>
+                        <ISP.Lanyard:Backend.Button icon="ticket">
+                            <ISP.Lanyard:Backend.T id="action.resendTickets" fallback="Tickets erneut senden" />
                         </ISP.Lanyard:Backend.Button>
                     </form>
 

@@ -22,6 +22,9 @@
             <trans-unit id="action.cancel.refund" xml:space="preserve">
                 <source>Online bezahlt: Der Betrag wird über den Zahlungsanbieter erstattet.</source>
             </trans-unit>
+            <trans-unit id="action.downloadTickets" xml:space="preserve">
+                <source>PDF</source>
+            </trans-unit>
             <trans-unit id="action.markPaid" xml:space="preserve">
                 <source>Als bezahlt markieren</source>
             </trans-unit>
@@ -30,6 +33,12 @@
             </trans-unit>
             <trans-unit id="action.reject.reason" xml:space="preserve">
                 <source>Begründung (optional, erscheint in der E-Mail)</source>
+            </trans-unit>
+            <trans-unit id="action.resendTickets" xml:space="preserve">
+                <source>Tickets erneut senden</source>
+            </trans-unit>
+            <trans-unit id="action.resendTickets.hint" xml:space="preserve">
+                <source>Schickt die Mail „Zahlung eingegangen“ mit den Tickets noch einmal an den Besteller.</source>
             </trans-unit>
             <trans-unit id="action.syncPayment" xml:space="preserve">
                 <source>Zahlungsstand abfragen</source>
@@ -75,6 +84,12 @@
             </trans-unit>
             <trans-unit id="detail.progress" xml:space="preserve">
                 <source>Ablauf</source>
+            </trans-unit>
+            <trans-unit id="detail.qrTickets" xml:space="preserve">
+                <source>QR-Tickets</source>
+            </trans-unit>
+            <trans-unit id="detail.qrTickets.hint" xml:space="preserve">
+                <source>Ein Ticket je Person, ausgestellt mit der Zahlung. Beim Storno werden sie ungültig.</source>
             </trans-unit>
             <trans-unit id="detail.received" xml:space="preserve">
                 <source>eingegangen am {0}</source>
@@ -186,6 +201,9 @@
             </trans-unit>
             <trans-unit id="field.ticket" xml:space="preserve">
                 <source>Ticket</source>
+            </trans-unit>
+            <trans-unit id="field.ticketCode" xml:space="preserve">
+                <source>Code</source>
             </trans-unit>
             <trans-unit id="field.ticketCount" xml:space="preserve">
                 <source>Tickets</source>
@@ -645,6 +663,12 @@
             </trans-unit>
             <trans-unit id="status.requested" xml:space="preserve">
                 <source>Wartet auf Freigabe</source>
+            </trans-unit>
+            <trans-unit id="ticket.status.cancelled" xml:space="preserve">
+                <source>storniert</source>
+            </trans-unit>
+            <trans-unit id="ticket.status.valid" xml:space="preserve">
+                <source>gültig</source>
             </trans-unit>
         </body>
     </file>

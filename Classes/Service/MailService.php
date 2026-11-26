@@ -58,6 +58,12 @@ class MailService
     #[Flow\Inject]
     protected PaymentService $paymentService;
 
+    #[Flow\Inject]
+    protected TicketPdfService $ticketPdfService;
+
+    #[Flow\InjectConfiguration(path: 'tickets.pdf.attachTo', package: 'ISP.Lanyard')]
+    protected array $attachTicketsTo = [];
+
     #[Flow\InjectConfiguration(path: 'mail', package: 'ISP.Lanyard')]
     protected array $mailSettings = [];
 
@@ -181,6 +187,10 @@ class MailService
             ->html($html)
             ->text($this->htmlToText($html));
 
+        if (in_array($templateName, $this->attachTicketsTo, true)) {
+            $this->attachTickets($email, $order);
+        }
+
         $replyTo = (string)($this->mailSettings['replyToAddress'] ?? '');
 
         if ($replyTo !== '') {
@@ -196,6 +206,26 @@ class MailService
             $this->logger->error(sprintf(
                 'ISP.Lanyard: Mail "%s" für Bestellung %s konnte nicht versendet werden: %s',
                 $templateName,
+                $order->getBookingNumber() ?? '-',
+                $exception->getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Hängt das Ticket-PDF an. Scheitert das PDF, geht die Mail ohne
+     * Anhang raus – die Zahlung ist bereits gebucht, das Orga-Team
+     * kann die Tickets aus dem Backend neu senden.
+     */
+    protected function attachTickets(Email $email, Order $order): void
+    {
+        try {
+            foreach ($this->ticketPdfService->renderFiles($order) as $filename => $pdf) {
+                $email->attach($pdf, $filename, 'application/pdf');
+            }
+        } catch (\Throwable $exception) {
+            $this->logger->error(sprintf(
+                'ISP.Lanyard: Ticket-PDF für Bestellung %s konnte nicht erzeugt werden: %s',
                 $order->getBookingNumber() ?? '-',
                 $exception->getMessage()
             ));

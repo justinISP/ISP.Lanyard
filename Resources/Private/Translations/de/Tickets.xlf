@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- ISP.Lanyard: Ticket-PDF. Überschreibbar im Sitepackage über eine Datei mit product-name="ISP.Lanyard" original="Tickets". -->
+    <file original="Tickets" product-name="ISP.Lanyard" source-language="de" datatype="plaintext">
+        <body>
+            <trans-unit id="bookingNumber" xml:space="preserve">
+                <source>Buchungsnummer</source>
+            </trans-unit>
+            <trans-unit id="holder" xml:space="preserve">
+                <source>Besteller</source>
+            </trans-unit>
+            <trans-unit id="note" xml:space="preserve">
+                <source>Jeder QR-Code gilt für eine Person und wird beim Einlass gescannt. Bitte geben Sie ihn nicht weiter.</source>
+            </trans-unit>
+            <trans-unit id="price" xml:space="preserve">
+                <source>Preis</source>
+            </trans-unit>
+            <trans-unit id="ticket" xml:space="preserve">
+                <source>Ticket</source>
+            </trans-unit>
+            <trans-unit id="ticketOf" xml:space="preserve">
+                <source>{0} von {1}</source>
+            </trans-unit>
+            <trans-unit id="validOn" xml:space="preserve">
+                <source>Gültig am</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

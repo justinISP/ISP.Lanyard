@@ -5,12 +5,15 @@ namespace ISP\Lanyard\Command;
 
 use ISP\Lanyard\Domain\Exception\InvalidStatusTransitionException;
 use ISP\Lanyard\Domain\Model\EventDay;
+use ISP\Lanyard\Domain\Model\OrderStatus;
 use ISP\Lanyard\Domain\Repository\EventDayRepository;
 use ISP\Lanyard\Domain\Repository\EventRepository;
 use ISP\Lanyard\Domain\Repository\OrderRepository;
+use ISP\Lanyard\Domain\Repository\TicketRepository;
 use ISP\Lanyard\Domain\Service\CapacityService;
 use ISP\Lanyard\Domain\Service\OrderService;
 use ISP\Lanyard\Payment\PaymentService;
+use ISP\Lanyard\Service\TicketPdfService;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Cli\CommandController;
 
@@ -36,6 +39,12 @@ class LanyardCommandController extends CommandController
 
     #[Flow\Inject]
     protected PaymentService $paymentService;
+
+    #[Flow\Inject]
+    protected TicketPdfService $ticketPdfService;
+
+    #[Flow\Inject]
+    protected TicketRepository $ticketRepository;
 
     /**
      * Lässt unbestätigte Bestellungen verfallen
@@ -167,5 +176,62 @@ class LanyardCommandController extends CommandController
         }
 
         $this->outputLine('%d Tage geprüft, %d korrigiert.', [count($days), $changed]);
+    }
+
+    /**
+     * Stellt fehlende Tickets für bezahlte Bestellungen aus
+     *
+     * Neue Bestellungen bekommen ihre Tickets mit der Zahlung. Dieses
+     * Kommando holt das für Bestellungen nach, die vorher bezahlt
+     * wurden. Es verschickt keine Mails.
+     *
+     * @param bool $dryRun Nur anzeigen, nichts ändern
+     */
+    public function issueTicketsCommand(bool $dryRun = false): void
+    {
+        $issued = 0;
+
+        foreach ($this->orderRepository->findByStatus(OrderStatus::PAID) as $order) {
+            if ($this->ticketRepository->findByOrderInOrder($order) !== []) {
+                continue;
+            }
+
+            $this->outputLine('%s  %d Ticket(s)', [$order->getBookingNumber(), $order->getTotalQuantity()]);
+
+            if (!$dryRun) {
+                $this->orderService->issueTickets($order);
+            }
+
+            $issued++;
+        }
+
+        $this->outputLine('%d Bestellung(en)%s.', [$issued, $dryRun ? ' (Probelauf)' : '']);
+    }
+
+    /**
+     * Schreibt die Ticket-PDFs einer Bestellung in ein Verzeichnis
+     *
+     * Zum Prüfen der Gestaltung, ohne eine Mail auszulösen.
+     *
+     * @param string $bookingNumber Buchungsnummer
+     * @param string $directory Zielverzeichnis, z. B. /tmp
+     */
+    public function ticketPdfCommand(string $bookingNumber, string $directory): void
+    {
+        $order = $this->orderRepository->findOneByBookingNumber($bookingNumber);
+
+        if ($order === null) {
+            $this->outputLine('Bestellung %s nicht gefunden.', [$bookingNumber]);
+            $this->quit(1);
+        }
+
+        $started = microtime(true);
+
+        foreach ($this->ticketPdfService->renderFiles($order) as $filename => $pdf) {
+            file_put_contents(rtrim($directory, '/') . '/' . $filename, $pdf);
+            $this->outputLine('%s', [$filename]);
+        }
+
+        $this->outputLine('Fertig nach %.1f s.', [microtime(true) - $started]);
     }
 }

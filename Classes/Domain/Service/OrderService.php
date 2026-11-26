@@ -48,6 +48,9 @@ class OrderService
     #[Flow\Inject]
     protected OrderHistoryService $orderHistoryService;
 
+    #[Flow\Inject]
+    protected TicketService $ticketService;
+
     #[Flow\InjectConfiguration(path: 'optIn.lifetime', package: 'ISP.Lanyard')]
     protected string $optInLifetime = 'PT24H';
 
@@ -233,6 +236,7 @@ class OrderService
             $order->setRejectionReason($reason);
             $order->touch();
             $this->orderRepository->update($order);
+            $this->ticketService->cancel($order);
             $this->orderHistoryService->record($order, OrderLogEntry::ACTION_CANCELLED, $reason);
         });
 
@@ -263,10 +267,34 @@ class OrderService
             $order->setPaymentDate($date ?? new \DateTimeImmutable());
             $order->touch();
             $this->orderRepository->update($order);
+            // Tickets gibt es erst mit der Zahlung, bei jeder Zahlungsart
+            $this->ticketService->issue($order);
             $this->orderHistoryService->record($order, OrderLogEntry::ACTION_PAID, $method ?? $order->getPaymentMethod(), $actorType);
         });
 
         $this->emitOrderPaid($order);
+    }
+
+    /**
+     * Stellt die Tickets einer bezahlten Bestellung aus, falls sie noch
+     * keine hat – für Bestellungen, die vor Einführung der Tickets
+     * bezahlt wurden. Sonst passiert das mit markAsPaid().
+     *
+     * @return int Anzahl der Tickets der Bestellung
+     */
+    public function issueTickets(Order $order): int
+    {
+        if ($order->getStatus() !== OrderStatus::PAID) {
+            return 0;
+        }
+
+        $count = 0;
+
+        $this->transactional(function () use ($order, &$count): void {
+            $count = count($this->ticketService->issue($order));
+        });
+
+        return $count;
     }
 
     /**

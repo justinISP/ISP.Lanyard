@@ -13,11 +13,11 @@ privilegeTargets:
     # Lesender Zugriff: Listen, Detailansicht, Auslastung, Abholliste,
     # Exporte.
     'ISP.Lanyard:ViewOrders':
-      matcher: 'method(ISP\Lanyard\Controller\Module\Management\OrderController->(index|show|capacity|export|pickup|pickupExport)Action())'
+      matcher: 'method(ISP\Lanyard\Controller\Module\Management\OrderController->(index|show|capacity|export|pickup|pickupExport|downloadTickets)Action())'
 
     # Statuswechsel, Bearbeiten, manuelle Buchung.
     'ISP.Lanyard:ManageOrders':
-      matcher: 'method(ISP\Lanyard\Controller\Module\Management\OrderController->(approve|reject|cancel|markPaid|syncPayment|edit|update|new|create)Action())'
+      matcher: 'method(ISP\Lanyard\Controller\Module\Management\OrderController->(approve|reject|cancel|markPaid|syncPayment|resendTickets|edit|update|new|create)Action())'
 
     # Stammdaten: Events, Tage, Ticketarten, Kapazitäten. Alle Actions
     # des SetupControllers, auch die lesenden – TicketViewer sieht die

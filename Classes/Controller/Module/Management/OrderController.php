@@ -10,16 +10,20 @@ use ISP\Lanyard\Domain\Model\EventDay;
 use ISP\Lanyard\Domain\Model\Order;
 use ISP\Lanyard\Domain\Model\OrderStatus;
 use ISP\Lanyard\Domain\Model\PaymentStatus;
+use ISP\Lanyard\Domain\Model\Ticket;
 use ISP\Lanyard\Domain\Repository\EventDayRepository;
 use ISP\Lanyard\Domain\Repository\EventRepository;
 use ISP\Lanyard\Domain\Repository\OrderRepository;
+use ISP\Lanyard\Domain\Repository\TicketRepository;
 use ISP\Lanyard\Domain\Service\OrderHistoryService;
 use ISP\Lanyard\Domain\Service\OrderService;
 use ISP\Lanyard\Payment\PaymentException;
 use ISP\Lanyard\Payment\PaymentService;
 use ISP\Lanyard\Service\CsvWriter;
+use ISP\Lanyard\Service\MailService;
 use ISP\Lanyard\Service\OrderAdminService;
 use ISP\Lanyard\Service\PriceFormatter;
+use ISP\Lanyard\Service\TicketPdfService;
 use Neos\Error\Messages\Message;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\QueryResultInterface;
@@ -80,6 +84,15 @@ class OrderController extends AbstractTicketModuleController
 
     #[Flow\Inject]
     protected PriceFormatter $priceFormatter;
+
+    #[Flow\Inject]
+    protected TicketRepository $ticketRepository;
+
+    #[Flow\Inject]
+    protected TicketPdfService $ticketPdfService;
+
+    #[Flow\Inject]
+    protected MailService $mailService;
 
     #[Flow\InjectConfiguration(path: 'backend.itemsPerPage', package: 'ISP.Lanyard')]
     protected int $itemsPerPage = 25;
@@ -175,6 +188,8 @@ class OrderController extends AbstractTicketModuleController
     {
         $detail = $this->summarise($order);
         $online = $this->paymentService->isOnline($order->getPaymentMethod());
+        $tickets = $this->ticketRepository->findByOrderInOrder($order);
+        $validTickets = array_filter($tickets, static fn(Ticket $ticket): bool => $ticket->isValid());
 
         $detail += [
             'phone' => $order->getPhone(),
@@ -195,6 +210,15 @@ class OrderController extends AbstractTicketModuleController
             // Storno erstattet über das Gateway
             'refundOnCancel' => $online && $order->getPaymentStatus() === PaymentStatus::PAID,
             'items' => [],
+            'tickets' => array_map(static fn(Ticket $ticket): array => [
+                'number' => $ticket->getNumber(),
+                'code' => $ticket->getCode(),
+                'title' => $ticket->getOrderItem()->getTicketTypeTitle(),
+                'valid' => $ticket->isValid(),
+            ], $tickets),
+            // Je Datei ein Download, große Bestellungen haben mehrere
+            'ticketFiles' => range(1, max(1, $this->ticketPdfService->getFileCount($order))),
+            'hasValidTickets' => $validTickets !== [],
             'history' => [],
             'can' => [
                 'approve' => OrderStatus::canTransition($order->getStatus(), OrderStatus::CONFIRMED),
@@ -203,6 +227,7 @@ class OrderController extends AbstractTicketModuleController
                 // Online-Zahlungen bucht das Gateway, nicht das Orga-Team
                 'markPaid' => !$online && OrderStatus::canTransition($order->getStatus(), OrderStatus::PAID),
                 'syncPayment' => $online && $order->getPaymentReference() !== null && $order->getStatus() === OrderStatus::PENDING_PAYMENT,
+                'resendTickets' => $order->getStatus() === OrderStatus::PAID && $validTickets !== [],
             ],
         ];
 
@@ -381,6 +406,37 @@ class OrderController extends AbstractTicketModuleController
         }
 
         $this->redirect('show', null, null, ['order' => $order]);
+    }
+
+    /**
+     * Schickt die Mail "Zahlung eingegangen" mit den Tickets noch
+     * einmal – z. B. wenn sie im Spam gelandet ist.
+     */
+    public function resendTicketsAction(Order $order): void
+    {
+        $this->assertGranted(self::PRIVILEGE_MANAGE_ORDERS);
+
+        if ($order->getStatus() !== OrderStatus::PAID || $this->ticketRepository->countValidByOrder($order) === 0) {
+            $this->addFlashMessage('Für diese Bestellung gibt es keine gültigen Tickets.', '', Message::SEVERITY_ERROR);
+        } else {
+            $this->mailService->sendPaid($order);
+            $this->addFlashMessage(sprintf('Die Tickets sind erneut an %s gesendet.', $order->getEmail()));
+        }
+
+        $this->redirect('show', null, null, ['order' => $order]);
+    }
+
+    /**
+     * Ticket-PDF zum Herunterladen, bei großen Bestellungen je Teil.
+     */
+    public function downloadTicketsAction(Order $order, int $part = 1): string
+    {
+        [$filename, $pdf] = $this->ticketPdfService->renderFile($order, $part);
+
+        $this->response->setContentType('application/pdf');
+        $this->response->setHttpHeader('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
+
+        return $pdf;
     }
 
     public function markPaidAction(Order $order, string $method = ''): void
