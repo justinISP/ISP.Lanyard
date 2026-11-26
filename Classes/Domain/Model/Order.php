@@ -257,6 +257,23 @@ class Order
     protected ?string $formUri = null;
 
     /**
+     * Seiten der Website nach der Online-Zahlung, verlinkt am
+     * Formular-Element. Leer: eigene Rückkehrseite.
+     *
+     * @var string|null
+     *
+     * @ORM\Column(length=1000, nullable=true)
+     */
+    protected ?string $successUri = null;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(length=1000, nullable=true)
+     */
+    protected ?string $failureUri = null;
+
+    /**
      * Gehasht, nie im Klartext. Dient dem Rate-Limit und der
      * Missbrauchsanalyse.
      *
@@ -586,6 +603,26 @@ class Order
     public function setFormUri(?string $formUri): void
     {
         $this->formUri = $formUri;
+    }
+
+    public function getSuccessUri(): ?string
+    {
+        return $this->successUri;
+    }
+
+    public function setSuccessUri(?string $successUri): void
+    {
+        $this->successUri = $successUri;
+    }
+
+    public function getFailureUri(): ?string
+    {
+        return $this->failureUri;
+    }
+
+    public function setFailureUri(?string $failureUri): void
+    {
+        $this->failureUri = $failureUri;
     }
 
     /**

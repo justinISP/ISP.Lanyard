@@ -118,18 +118,6 @@ ISP:
           connectTimeout: 5
           readTimeout: 30
 
-      # Nach der Rückkehr vom Gateway auf Seiten der Website weiterleiten
-      # statt die eigene Rückkehrseite zu zeigen – je Ausgang eine Adresse
-      # pro Sprache, fehlt die Sprache, gilt 'de'. Der Stand wird vorher
-      # wie immer beim Gateway abgefragt.
-      #   success: bezahlt, und Zahlung noch in Prüfung (die Bestätigung
-      #            kommt dann per Mail)
-      #   failure: abgebrochen, fehlgeschlagen, unbekannte Bestellung
-      # Leer = eigene Rückkehrseite von Lanyard.
-      resultUris:
-        success: {  }
-        failure: {  }
-
       # Fusion für Rückkehrseite und Test-Gateway, gerendert wird der
       # Pfad 'lanyardPayment'. Wie optIn.fusionPathPatterns.
       fusionPathPatterns:

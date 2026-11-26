@@ -30,6 +30,7 @@ use Psr\Http\Message\UriFactoryInterface;
  * - language: Sprache für die Folgemails
  * - data: die Formulardaten
  * - formUri: Adresse der Formularseite, für "erneut bestellen"
+ * - successUri, failureUri: Seiten nach der Online-Zahlung (optional)
  * - message: Inhalt nach dem Absenden ohne Online-Zahlung
  * - soldOutMessage: Plätze zwischen Prüfung und Buchung weg
  * - paymentErrorMessage: Gateway nicht erreichbar
@@ -74,8 +75,10 @@ class PlaceOrderAction extends AbstractAction
                 return $response;
             }
 
-            $formUri = (string)($this->options['formUri'] ?? '');
-            $order->setFormUri($formUri !== '' ? $formUri : null);
+            foreach (['formUri' => 'setFormUri', 'successUri' => 'setSuccessUri', 'failureUri' => 'setFailureUri'] as $option => $setter) {
+                $uri = (string)($this->options[$option] ?? '');
+                $order->$setter($uri !== '' ? $uri : null);
+            }
 
             $this->orderService->placeForPayment($order, (string)$order->getPaymentMethod(), $this->paymentService->generateToken());
             $redirectUri = $this->paymentService->start($order);

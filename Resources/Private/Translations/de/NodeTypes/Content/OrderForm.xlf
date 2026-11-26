@@ -16,8 +16,20 @@
             <trans-unit id="properties.eventIdentifier.placeholder" xml:space="preserve">
                 <source>Veranstaltung wählen</source>
             </trans-unit>
+            <trans-unit id="properties.failurePage" xml:space="preserve">
+                <source>Seite nach abgebrochener Zahlung</source>
+            </trans-unit>
+            <trans-unit id="properties.failurePage.help" xml:space="preserve">
+                <source>Für Online-Zahlung: Hierhin geht es, wenn die Zahlung abgebrochen wurde oder fehlgeschlagen ist. Leer: eine einfache Seite von Lanyard.</source>
+            </trans-unit>
             <trans-unit id="properties.privacyPage" xml:space="preserve">
                 <source>Datenschutzerklärung</source>
+            </trans-unit>
+            <trans-unit id="properties.successPage" xml:space="preserve">
+                <source>Seite nach erfolgreicher Zahlung</source>
+            </trans-unit>
+            <trans-unit id="properties.successPage.help" xml:space="preserve">
+                <source>Für Online-Zahlung: Hierhin geht es nach der Zahlung, auch wenn die Bestätigung des Zahlungsanbieters noch aussteht – die Bestätigung kommt dann per E-Mail. Leer: eine einfache Seite von Lanyard.</source>
             </trans-unit>
             <trans-unit id="ui.label" xml:space="preserve">
                 <source>Ticketbestellung</source>

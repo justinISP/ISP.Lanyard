@@ -73,6 +73,16 @@ prototype(ISP.Lanyard:Integration.OrderForm.Renderer) < prototype(Neos.Fusion.Fo
                     node = ${documentNode}
                     absolute = true
                 }
+                successUri = Neos.Neos:NodeUri {
+                    node = ${q(node).property('successPage')}
+                    absolute = true
+                    @if.hasPage = ${q(node).property('successPage')}
+                }
+                failureUri = Neos.Neos:NodeUri {
+                    node = ${q(node).property('failurePage')}
+                    absolute = true
+                    @if.hasPage = ${q(node).property('failurePage')}
+                }
                 soldOutMessage = ISP.Lanyard:Presentation.OrderForm.Message {
                     text = ISP.Lanyard:Translate {
                         id = 'soldOut'

@@ -41,3 +41,25 @@
           position: 20
           editorOptions:
             nodeTypes: ['Neos.Neos:Document']
+    successPage:
+      type: reference
+      ui:
+        label: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.successPage'
+        help:
+          message: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.successPage.help'
+        inspector:
+          group: lanyard
+          position: 30
+          editorOptions:
+            nodeTypes: ['Neos.Neos:Document']
+    failurePage:
+      type: reference
+      ui:
+        label: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.failurePage'
+        help:
+          message: 'ISP.Lanyard:NodeTypes.Content.OrderForm:properties.failurePage.help'
+        inspector:
+          group: lanyard
+          position: 40
+          editorOptions:
+            nodeTypes: ['Neos.Neos:Document']

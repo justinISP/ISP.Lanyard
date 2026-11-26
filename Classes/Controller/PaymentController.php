@@ -18,8 +18,9 @@ use Neos\Fusion\View\FusionView;
  *
  * Die Rückkehrseite fragt den Stand selbst beim Gateway ab, statt der
  * Rückkehr zu glauben: Ein Besteller könnte die URL sonst ohne Zahlung
- * aufrufen. Danach geht es auf die Seiten aus payment.resultUris oder,
- * wenn keine eingetragen sind, auf die eigene Rückkehrseite: gerendert
+ * aufrufen. Danach geht es auf die Seiten, die am Formular-Element
+ * verlinkt sind, oder – ohne verlinkte Seite – auf die eigene
+ * Rückkehrseite: gerendert
  * über Fusion, Pfad 'lanyardPayment', Dateien aus
  * ISP.Lanyard.payment.fusionPathPatterns.
  */
@@ -37,9 +38,6 @@ class PaymentController extends ActionController
 
     #[Flow\Inject]
     protected PaymentService $paymentService;
-
-    #[Flow\InjectConfiguration(path: 'payment.resultUris', package: 'ISP.Lanyard')]
-    protected array $resultUris = [];
 
     // $logger stammt aus dem ActionController.
 
@@ -77,8 +75,8 @@ class PaymentController extends ActionController
 
         $state = $this->determineState($order);
 
-        // Seiten der Website statt der eigenen Rückkehrseite
-        $resultUri = $this->resultUri($state, $order !== null ? $order->getLanguage() : 'de');
+        // Am Formular verlinkte Seiten statt der eigenen Rückkehrseite
+        $resultUri = $this->resultUri($state, $order);
 
         if ($resultUri !== '') {
             $this->redirectToUri($resultUri, 0, 303);
@@ -120,11 +118,16 @@ class PaymentController extends ActionController
         return $known ? 'ok' : 'ignored';
     }
 
-    protected function resultUri(string $state, string $language): string
+    protected function resultUri(string $state, ?Order $order): string
     {
-        $uris = (array)($this->resultUris[in_array($state, [self::STATE_PAID, self::STATE_PENDING], true) ? 'success' : 'failure'] ?? []);
+        if ($order === null) {
+            return '';
+        }
 
-        return trim((string)($uris[$language] ?? $uris['de'] ?? ''));
+        $uri = in_array($state, [self::STATE_PAID, self::STATE_PENDING], true) ? $order->getSuccessUri() : $order->getFailureUri();
+
+        // Nur selbst gespeicherte, absolute Adressen
+        return preg_match('#^https?://#i', (string)$uri) === 1 ? (string)$uri : '';
     }
 
     protected function determineState(?Order $order): string
