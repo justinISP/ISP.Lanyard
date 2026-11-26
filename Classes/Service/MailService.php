@@ -280,12 +280,24 @@ class MailService
         return $this->priceFormatter->format($cents, $language);
     }
 
+    /**
+     * Textfassung für Mailprogramme ohne HTML. Kommt auch mit
+     * Tabellen-Layouts zurecht: Kopf und versteckte Vorschauzeilen
+     * fallen weg, Zellen einer Zeile bleiben auf einer Zeile.
+     */
     protected function htmlToText(string $html): string
     {
-        $text = preg_replace('#<br\s*/?>|</(p|div|tr|h[1-6]|li)>#i', "\n", $html);
+        $text = preg_replace('#<(head|style|script)\b.*?</\1>#is', '', $html);
+        $text = preg_replace('#<(div|span)\b[^>]*display\s*:\s*none[^>]*>.*?</\1>#is', '', (string)$text);
+        // Umbrüche im Quelltext zählen in HTML nicht
+        $text = preg_replace('/\s+/', ' ', (string)$text);
+        $text = preg_replace('#</(p|h[1-6])>#i', "\n\n", (string)$text);
+        $text = preg_replace('#<br\s*/?>|</(div|tr|table|li)>#i', "\n", (string)$text);
+        $text = preg_replace('#</t[dh]>#i', ' ', (string)$text);
         $text = html_entity_decode(strip_tags((string)$text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = preg_replace("/[ \t]+/", ' ', $text);
-        $text = preg_replace("/\n\s*\n\s*\n+/", "\n\n", (string)$text);
+        $text = preg_replace('/[ \t\x{00A0}]+/u', ' ', $text);
+        $text = preg_replace('/ *\n */', "\n", (string)$text);
+        $text = preg_replace("/\n{3,}/", "\n\n", (string)$text);
 
         return trim((string)$text);
     }
